@@ -7,7 +7,7 @@ a1b2c3d4e5f
 treb7uchet
 `.trim();
 
-async function linesFrom(source:Deno.Reader = Deno.stdin):Promise<string[]> {
+export async function linesFrom(source:Deno.Reader = Deno.stdin):Promise<string[]> {
     const ret = [];
     const reader = readStringDelim(source, '\n');
 
