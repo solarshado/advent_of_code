@@ -1,1 +1,3 @@
 session.txt
+*.lock
+*_input.txt

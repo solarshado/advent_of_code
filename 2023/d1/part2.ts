@@ -1,4 +1,4 @@
-import { linesFrom } from "./part1.ts";
+import { linesFrom } from "../util.ts";
 
 const example = `
 two1nine
