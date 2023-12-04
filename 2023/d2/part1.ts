@@ -72,3 +72,5 @@ async function main() {
 
 if(import.meta.main)
     await main();
+
+export {type Game, type ItemSet, example, parseGame, smallestBagFor, isFirstLargerOrEqual, filterPossibleGames};
