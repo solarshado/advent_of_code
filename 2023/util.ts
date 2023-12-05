@@ -23,3 +23,15 @@ export function sum<T>(nums:T[], mapper?:((v:T)=>number)):number
 
     return nums.reduce(reducer,0);
 }
+
+function* _intersect<T>(larger:Set<T>, smaller:Set<T>) {
+    for(const item of smaller)
+        if(larger.has(item))
+            yield item;
+}
+
+export function setIntersection<T>(a:Set<T>, b:Set<T>):Set<T> {
+    const [larger, smaller] = a.size > b.size ? [a,b] : [b,a];
+
+    return new Set(_intersect(larger,smaller))
+}
