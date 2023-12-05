@@ -99,3 +99,5 @@ async function main() {
 
 if(import.meta.main)
     await main();
+
+export {type MapOverride, example, parseOverride, mapStep, mapMultiStep, parseAlmanac };
