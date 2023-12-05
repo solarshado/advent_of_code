@@ -11,7 +11,11 @@ export async function linesFrom(source:Deno.Reader = Deno.stdin):Promise<string[
     return ret;
 }
 
-export function sum<T=number>(nums:T[], mapper?:((v:T)=>number)):number {
+export function sum(nums:number[], mapper?:((v:number)=>number)):number;
+export function sum<T>(nums:T[], mapper:((v:T)=>number)):number;
+
+export function sum<T>(nums:T[], mapper?:((v:T)=>number)):number
+{
     const reducer:(acc:number,curr:T)=>number =
         typeof mapper === "function" ?
         (acc,curr)=> acc + mapper(curr) :

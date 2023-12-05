@@ -23,8 +23,9 @@ function isSymbol(s:string):boolean {
 
 type GridNumber = {
   value: number;
-  originX: number;
-  originY: number;
+  y: number;
+  startX: number;
+  endX: number;
 };
 
 class Grid {
@@ -43,11 +44,18 @@ class Grid {
         return this.data[y][x];
     }
 
-    getNeighborhood(x:number, y:number):string[] {
+    getNeighborhoodCoords(x:number, y:number) {
         const minX = Math.max(x-1,0);
         const maxX = Math.min(x+1,this.width-1);
         const minY = Math.max(y-1,0);
         const maxY = Math.min(y+1,this.height-1);
+
+        return {minX, maxX, minY, maxY};
+    }
+
+    getNeighborhood(x:number, y:number):string[] {
+        const {minX, maxX, minY, maxY} =
+            this.getNeighborhoodCoords(x,y);
 
         //console.log(`getNeighborhood(${x},${y}):`,{minX,maxX,minY,maxY});
 
@@ -60,7 +68,6 @@ class Grid {
         return ret;
     }
 
-    /** @deprecated broken, do not use */
     getFullNumberAt(x:number, y:number):GridNumber|null {
         const row = this.data[y];
         const startPoint = row[x];
@@ -68,24 +75,26 @@ class Grid {
             return null;
 
         let strNum = startPoint;
-        let originX = x;
+        let startX = x;
+        let endX = x;
 
         for(let _x = x+1; _x < this.width; ++_x) {
             const c = row[_x];
             if(!isDigit(c))
                 break;
             strNum = strNum + c;
+            endX = _x;
         }
 
-        for(let _x = x-1; _x < 0; ++_x) {
+        for(let _x = x-1; _x >= 0; --_x) {
             const c = row[_x];
             if(!isDigit(c))
                 break;
             strNum = c + strNum;
-            originX = _x;
+            startX = _x;
         }
 
-        return {value: +strNum, originX, originY: y};
+        return {value: +strNum, y, startX, endX};
     }
 }
 
@@ -155,3 +164,5 @@ async function main() {
 
 if(import.meta.main)
     await main();
+
+export { type GridNumber, example, isDigit, isSymbol, Grid };
