@@ -1,4 +1,4 @@
-import { linesFrom } from "../util.ts";
+import { linesFrom, sum } from "../util.ts";
 
 const example = `
 `.trim();
@@ -8,14 +8,12 @@ function foo() {
 }
 
 async function main() {
-    const lines = await linesFrom();
-    //const lines = example.split('\n');
+    //const lines = (await linesFrom()).filter(l=>l!='');
+    const lines = example.split('\n');
 
-    //const values = lines.filter(l=>l!='').map(getCalibrationValue);
+    //const values = lines.map(...);
 
-    //const result = values.reduce((l,r)=>l+r);
-
-    console.log(result);
+    console.log(sum(values));
 }
 
 if(import.meta.main)
