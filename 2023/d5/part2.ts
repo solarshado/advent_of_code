@@ -1,10 +1,6 @@
-import { linesFrom, sum } from "../util.ts";
-import { parseAlmanac, mapMultiStep, example } from './part1.ts';
-
-/*
-const example = `
-`.trim();
-*/
+import { linesFrom } from "../util.ts";
+import { parseAlmanac, mapMultiStep } from './part1.ts';
+import { range, concat, reduce, map } from '../iter_util.ts';
 
 async function main() {
     const lines = (await linesFrom()).filter(l=>l!='');
@@ -15,30 +11,13 @@ async function main() {
     //console.log(maps);
     //console.log(seeds);
 
-    function* range(start:number, length:number) {
-        for(let n = start; n < start+length; ++n)
-            yield n;
-    }
-
-    function* concat<T>(...iters:Iterable<T>[]) {
-        for(const iter of iters)
-            yield* iter;
-    }
-
-    function* map<T,U>(mapper:(item:T)=>U, iter:Iterable<T>) {
-        for(const item of iter)
-            yield mapper(item);
-    }
-
-    function reduce<T,U>(reducer:(acc:T,cur:U)=>T, seed:T, iter:Iterable<U>) {
-        let acc = seed
-        for(const item of iter)
-            acc = reducer(acc,item);
-
-        return acc;
-    }
-
-    //TODO? memoize something to speedup the path calculations?
+    // performance is *slow as **fuck***.
+    // reddit mentions using the ranges themselves as the input values to
+    // *greatly* reduce the computations needed.
+    //
+    // interesting idea. not sure if I care enough to implement it yet.
+    // but I'll try to keep it in mind if a future problem sounds like it
+    // might benefit
 
     const seedRanges = seeds.reduce((acc,cur,i)=>{
         if(i%2 == 1) {
