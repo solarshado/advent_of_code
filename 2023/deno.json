@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "strict": true,
+    "lib": [
+      "deno.window",
+      "deno.unstable",
+      "dom.asynciterable"
+    ]
+  },
+  "lint": {
+    "rules": {
+      "tags": ["recommended"]
+    }
+  },
+  "tasks": {
+      "init": "deno run --allow-read=. --allow-write=\"$INIT_CWD\" --allow-env --allow-net=adventofcode.com deno_task.ts init"
+  }
+}
