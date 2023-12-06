@@ -1,12 +1,12 @@
-import { linesFrom, sum } from "../util.ts";
+import { linesFrom } from "../util.ts";
 import { range } from '../iter_util.ts';
 
-const example = `
+export const example = `
 Time:      7  15   30
 Distance:  9  40  200
 `.trim();
 
-type Race = {duration:number, distance:number};
+export type Race = {duration:number, distance:number};
 
 function parseRaces(lines:string[]):Race[] {
     const [times,distances] = lines.map(s=>
@@ -21,6 +21,10 @@ function parseRaces(lines:string[]):Race[] {
     return times.map((duration,i)=>({duration, distance: distances[i]}));
 }
 
+// this is just a parabola! it's directly solvable algebraically!
+// 'course I only spotted that by rewriting it to graph in WolframAlpha...
+// knew it had to be some curve, but wasn't sure if it'd be symetric
+// about the maxima...
 function findWinningTimes(race:Race):number[] {
     const {distance,duration} = race;
     const options = [...range(1,duration-1)]

@@ -1,12 +1,6 @@
-import { linesFrom, sum } from "../util.ts";
-import { range, map, filter, reduce } from '../iter_util.ts';
-
-const example = `
-Time:      7  15   30
-Distance:  9  40  200
-`.trim();
-
-type Race = {duration:number, distance:number};
+import { linesFrom } from "../util.ts";
+import { range, map, filter, count } from '../iter_util.ts';
+import { Race, example } from './part1.ts';
 
 function parseRace(lines:string[]):Race {
     const [time,distance] = lines.map(s=>
@@ -24,14 +18,12 @@ function findWinningTimes(race:Race):IterableIterator<number> {
     const {distance,duration} = race;
     const times = range(1,duration-1)
     const options = map(holdTime=>({
-                            duration:holdTime,
+                            duration: holdTime,
                             distance: holdTime * (duration - holdTime)
                         }),
                         times
                        );
     const winners = filter(o=> o.distance > distance, options);
-
-    //console.log("race",race,"options",options);
 
     return map(o=> o.duration, winners);
 }
@@ -47,7 +39,7 @@ async function main() {
     const winners = findWinningTimes(race);
     //console.log([...winners]);
 
-    const answer = reduce((acc,cur)=>acc+1, 0, winners)
+    const answer = count(winners)
     console.log(answer);
 }
 

@@ -27,3 +27,5 @@ export function reduce<T,U>(reducer:(acc:T,cur:U)=>T, seed:T, iter:Iterable<U>) 
 
     return acc;
 }
+
+export const count = (iter:Iterable<unknown>) => reduce((acc,_)=>acc+1, 0, iter);
