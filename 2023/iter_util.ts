@@ -14,6 +14,12 @@ export function* map<T,U>(mapper:(item:T)=>U, iter:Iterable<T>) {
         yield mapper(item);
 }
 
+export function* filter<T>(predecate:(item:T)=>boolean, iter:Iterable<T>) {
+    for(const item of iter)
+        if(predecate(item))
+            yield item;
+}
+
 export function reduce<T,U>(reducer:(acc:T,cur:U)=>T, seed:T, iter:Iterable<U>) {
     let acc = seed;
     for(const item of iter)
