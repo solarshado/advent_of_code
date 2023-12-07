@@ -2,3 +2,5 @@ session.txt
 session.cookie
 *.lock
 *_input.txt
+input.txt
+example.txt

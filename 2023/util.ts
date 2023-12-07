@@ -1,6 +1,8 @@
-import { readStringDelim } from "https://deno.land/std@0.105.0/io/mod.ts";
+//import { readStringDelim } from "https://deno.land/std@0.105.0/io/mod.ts";
 
 export async function linesFrom(source:Deno.Reader = Deno.stdin):Promise<string[]> {
+    const { readStringDelim } = await import("https://deno.land/std@0.105.0/io/mod.ts");
+
     const ret = [];
     const reader = readStringDelim(source, '\n');
 
@@ -9,6 +11,16 @@ export async function linesFrom(source:Deno.Reader = Deno.stdin):Promise<string[
     }
 
     return ret;
+}
+
+export type Main = (inputLines:string[])=>Promise<void>;
+export async function runMain(main:Main) {
+    const [_,mode="e"] = Deno.args;
+
+    const fileToLoad = mode == "m" ? "input.txt" :"example.txt";
+    const inputLines = (await Deno.readTextFile(fileToLoad)).split(/\r|\n|\r\n/);
+
+    await main(inputLines);
 }
 
 export function sum(nums:number[], mapper?:((v:number)=>number)):number;

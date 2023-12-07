@@ -1,19 +1,13 @@
-import { linesFrom, sum, product } from "../util.ts";
+import { runMain, linesFrom, sum, product } from "../util.ts";
 import { count } from "../iter_util2.ts";
-import { example } from './part1.ts';
-
-/*
-const example = `
-`.trim();
-*/
+import { } from './part1.ts';
 
 function foo() {
 
 }
 
-async function main() {
-    //const lines = (await linesFrom()).filter(l=>l!='');
-    const lines = example.split('\n');
+// TODO params
+export async function main(lines:string[]) {
 
     const values = 'TODO'
 
@@ -25,4 +19,4 @@ async function main() {
 }
 
 if(import.meta.main)
-    await main();
+    await runMain(main);
