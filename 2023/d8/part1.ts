@@ -1,32 +1,35 @@
-import { runMain, sum, product } from "../util.ts";
-import { count } from "../iter_util2.ts";
+import { runMain, } from "../util.ts";
 
-export type Node = {
+type Node = {
     name:string,
     L:Node,
     R:Node,
 };
 
 export function parseTree(lines:string[]):Node {
-    const nameMap = new Map();
+    type PrototypeNode = {
+        [prop in keyof Node]: Node[prop] extends Node ? Node | string : Node[prop];
+    };
+    const nameMap = new Map<string,PrototypeNode>();
 
     const nodes1 = lines.map((line)=> {
         console.log(line)
         const [_,name,L,R] = Array.from(/(\w{3}) = \((\w{3})\, (\w{3})\)/.exec(line)!.values())
-        const node = { name, L,R }
+        const node:PrototypeNode = { name, L,R };
         nameMap.set(name,node);
         return node;
-    })
-
-     nodes1.forEach((n)=> {
-         const {name,L:l,R:r} = n;
-         const [L,R] = [l,r].map(n=>nameMap.get(n)!);
-
-         n.L = L as Node;
-         n.R = R as Node;
     });
 
-    console.log(nodes1, );
+    // reify the prototypes
+    nodes1.forEach((n)=> {
+        const {L:l,R:r} = n;
+        const [L,R] = [l,r].map(c=>nameMap.get(c as string)!);
+
+        n.L = L as Node;
+        n.R = R as Node;
+    });
+
+    console.log(nodes1);
 
     return nameMap.get("AAA") as Node;
 }
