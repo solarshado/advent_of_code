@@ -1,6 +1,6 @@
-import { runMain, linesFrom, sum, product } from "../util.ts";
+import { runMain, } from "../util.ts";
 import { filter, count, reduce } from "../iter_util2.ts";
-import {parseDirections, } from './part1.ts';
+import { } from './part1.ts';
 
 type Node = {
     name:string,
@@ -17,19 +17,9 @@ function parseMap(lines:string[]):Map<string,Node> {
         const node = { name, L,R }
         nameMap.set(name,node);
         return node;
-    })
-
-    /*
-     nodes1.forEach((n)=> {
-         const {name,L:l,R:r} = n;
-         const [L,R] = [l,r].map(n=>nameMap.get(n)!);
-
-         n.L = L as Node;
-         n.R = R as Node;
     });
-    */
 
-    console.log(nodes1, );
+    console.log(nodes1);
 
     return nameMap;
 }
@@ -61,9 +51,11 @@ function countSteps(directions:IterableIterator<string>, map:Map<string,Node>, e
     return steps;
 }
 
-function countSteps2(directions:()=>IterableIterator<[number,string]>, map:Map<string,Node>, endCondition:(n:Node)=>boolean):number|never {
+function countSteps2(directions:()=>LoopIterator, map:Map<string,Node>, endCondition:(n:Node)=>boolean):number|never {
     let starts: Node[] = [...filter( map.values(), n=> n.name.endsWith("A"))]
     console.log("num start points:",starts.length);
+
+    const maxSteps = map.size * directions.length;
 
     const endsByPath = starts.map(s=> {
         const endPoints = new Set<number>();
@@ -84,7 +76,7 @@ function countSteps2(directions:()=>IterableIterator<[number,string]>, map:Map<s
             cur = map.get(cur[step as keyof Node])!;
             steps++;
 
-            if(steps > 1_000_000_000) {
+            if(steps > maxSteps) {
                 console.log("hit",steps,"for start",s,"; bailing with",endPoints.size,"possible exits");
             }
         }
@@ -121,29 +113,30 @@ function countSteps2(directions:()=>IterableIterator<[number,string]>, map:Map<s
     return Infinity;
 }
 
-function parseDirections2(line:string): IterableIterator<[number, string]> {
+type LoopIterator = IterableIterator<[number, string]> & {length:number};
+function parseDirections2(line:string):LoopIterator  {
     const chars = line.split("");
 
-    return (function* () {
+    const retVal = (function* () {
         while(true) {
             for(const char of chars.entries()) {
                 yield char;
             }
         }
-    })();
-
+    })() as LoopIterator;
+    retVal.length = chars.length;
+    return retVal;
 }
 
 export async function main(lines:string[]) {
-
     const [dir,...nodes] = lines.map(l=>l.trim()).filter(l=>l!='');
 
     //console.log(dir,nodes);
 
-    const route = parseDirections(dir);
+    //const route = parseDirections(dir);
     const tree = parseMap(nodes);
 
-    console.log(tree);
+    //console.log(tree);
 
     //const answer = countSteps(route,tree,n=>n.name.endsWith('Z'));
     const answer = countSteps2(()=>parseDirections2(dir),tree,n=>n.name.endsWith('Z'));
