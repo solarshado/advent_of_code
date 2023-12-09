@@ -1,12 +1,5 @@
-import { runMain, sum, product } from "../util.ts";
-import { count } from "../iter_util2.ts";
+import { runMain, sum } from "../util.ts";
 import { map } from "../iter_util2.ts";
-
-/*
-export type Foo = {
-    TODO:unknown,
-};
-*/
 
 export function allZero(ary:number[]) {
     return ary.every(v=>v===0);
@@ -26,17 +19,6 @@ export function buildDifferences(values:number[]):number[][] {
     do {
         const cur = retVal.at(-1)!;
 
-        /*
-           const next = cur.reduce((acc,cur,i)=>{
-           if(i == 0)
-           acc.push(cur)
-           else {
-
-           }
-           return acc;
-           },[] as number[]);
-           */
-
         const next = [...map(pairWise(cur), ([l,r])=> r-l)];
 
         retVal.push(next);
@@ -55,7 +37,6 @@ function predictNext(differences:number[][]):number {
 }
 
 export async function main(lines:string[]) {
-
     const differences = lines.filter(l=>l!='').map(l=>buildDifferences(l.trim().split(/\s+/).map(v=>+v)));
 
     console.log(differences);
