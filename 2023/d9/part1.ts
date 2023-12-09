@@ -20,7 +20,7 @@ export function* pairWise(src:number[]){
     }
 }
 
-function buildDifferences(values:number[]):number[][] {
+export function buildDifferences(values:number[]):number[][] {
     const retVal = [values];
 
     do {
