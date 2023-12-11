@@ -1,7 +1,5 @@
 import { runMain, sum, } from "../util.ts";
-import { count } from "../iter_util.ts";
-import { map } from "../iter_util2.ts";
-import { PipeGrid, Point, _getConnections, _getLoc, parseGrid, pointsEqual, directionMap, DirectionMap, getLoc, getConnections, Tile,  } from './part1.ts';
+import { _getConnections, _getLoc, directionMap, getConnections, getLoc, parseGrid, PipeGrid, Point, pointsEqual, Tile, } from './part1.ts';
 
 function findLoop(grid:PipeGrid):Point[] {
     type Loc = {loc:Point, prevLoc?:Point};
@@ -59,10 +57,7 @@ function countInsideLoop({tiles:grid, startPos}: PipeGrid, loop: Point[]):number
     const toggleState = (s:{prevState:"O"|"I"})=>
                 s.prevState = s.prevState == "O" ? "I" : "O";
 
-    //const isUpwardsCoener = (t:Tile)=> t === "L" || t === "J";
-    //const isDownwardsCoener = (t:Tile)=> t === "F" || t === "7";
-
-    const inside:Point[] = [];
+    //const inside:Point[] = [];
 
     const z1 = grid.map((r,y)=>{
         return r.reduce((acc,cur,x)=>{
@@ -93,8 +88,8 @@ function countInsideLoop({tiles:grid, startPos}: PipeGrid, loop: Point[]):number
                     }
             }
 
-            if(acc.prevState == "I")
-                inside.push([x,y]);
+            //if(acc.prevState == "I")
+            //    inside.push([x,y]);
 
             return acc;
         },{prevState:"O" as "O"|"I", prevCorner: "." as Tile, count:0}).count
@@ -103,78 +98,6 @@ function countInsideLoop({tiles:grid, startPos}: PipeGrid, loop: Point[]):number
     //console.log(renderPoints(grid,inside,"I"));
 
     return sum(z1);
-}
-
-function _countInsideLoop({tiles:grid}: PipeGrid, loop: Point[]):number {
-    const maxX = grid[0].length;
-    const maxY = grid.length;
-
-    const keyFunc = (x:number,y:number)=>x+","+y;
-    const keyFunc2 = ([x,y]:Point)=>keyFunc(x,y)
-    const isEdge = ([x,y]:Point)=>                    
-                                y == 0 || y == maxY-1 ||
-                                x == 0 || x == maxX-1;
-
-    const borders = new Set(loop.map(keyFunc2));
-
-    const toCheck:Point[] = [];
-    const outside = new Set<string>();
-
-    /// that paren hack is gross, but...
-    const wallGrid = grid.map((r,y)=>
-                             r.map((_,x)=>borders.has(keyFunc(x,y))?"#":
-                                            isEdge([x,y])?(outside.add(keyFunc(x,y)),"O"):
-                                            (toCheck.push([x,y])," ")
-                                  ));
-
-    type Tile = typeof wallGrid[0][0];
-
-    const connectivityMap:DirectionMap<Tile> = {
-        "#": directionMap["."],
-        " ": directionMap["S"],
-        "O": directionMap["S"]
-    };
-
-    const getTile = ([x,y]:Point)=> wallGrid[y][x];
-    const setTile = ([x,y]:Point,t:Tile)=> wallGrid[y][x]= t;
-
-    const updateCell = ([x,y]:Point):Tile=>{
-        const t = getTile([x,y]);
-        if(t== "#" || t== "O")
-            return t;
-
-        const neighs = _getConnections(wallGrid,[x,y],connectivityMap).map(keyFunc2)
-
-        if(neighs.some(n=>outside.has(n)))
-           return "O";
-
-       return " ";
-    };
-
-    let lastUpdate = 0;
-    while(toCheck.length > 0) {
-        const cur = toCheck.shift()!;
-
-        const t = getTile(cur);
-        const tNew = updateCell(cur);
-
-        if(tNew == t) {
-            toCheck.push(cur);
-            ++lastUpdate;
-        }
-        else {
-            lastUpdate = 0;
-            setTile(cur,tNew);
-            if(tNew === "O")
-                outside.add(keyFunc2(cur));
-        }
-
-        // is +2 necessary? to tired to care
-        if(lastUpdate > toCheck.length + 2)
-            break;
-    }
-
-    return toCheck.length;
 }
 
 const renderGrid = (g:string[][])=>g.map(l=>l.join("")).join('\n');
@@ -200,9 +123,12 @@ export async function main(lines:string[]) {
     const answer = countInsideLoop(grid,loop);
 
     console.log(answer);
-    //return answer;
 }
 
+if(import.meta.main)
+    await runMain(main);
+
+/*
 export async function _main(lines:string[]) {
     //for(const {input,ans} of examples.slice(1,2)) {
     for(const {input,ans} of examples) {
@@ -211,54 +137,7 @@ export async function _main(lines:string[]) {
     }
 }
 
-if(import.meta.main)
-    await runMain(main);
-
 const examples:{input:string, ans:number}[] = [
-    {input:
-`...........
-.S-------7.
-.|F-----7|.
-.||.....||.
-.||.....||.
-.|L-7.F-J|.
-.|..|.|..|.
-.L--J.L--J.
-...........
-`,ans:4},
-    {input:
-`..........
-.S------7.
-.|F----7|.
-.||....||.
-.||....||.
-.|L-7F-J|.
-.|..||..|.
-.L--JL--J.
-..........
-`,ans:4},
-    {input:
-`.F----7F7F7F7F-7....
-.|F--7||||||||FJ....
-.||.FJ||||||||L7....
-FJL7L7LJLJ||LJ.L-7..
-L--J.L7...LJS7F-7L7.
-....F-J..F7FJ|L7L7L7
-....L7.F7||L7|.L7L7|
-.....|FJLJ|FJ|F7|.LJ
-....FJL-7.||.||||...
-....L---J.LJ.LJLJ...
-`,ans:8},
-    {input:
-`FF7FSF7F7F7F7F7F---7
-L|LJ||||||||||||F--J
-FL-7LJLJ||||||LJL-77
-F--JF--7||LJLJ7F7FJ-
-L---JF-JLJ.||-FJLJJ7
-|F|F-JF---7F7-L7L|7|
-|FFJF7L7F-JF7|JL---7
-7-L-JL7||F7|L7F-7F7|
-L.L7LFJ|||||FJL7||LJ
-L7JLJL-JLJLJL--JLJ.L
-`,ans:10},
+    // redacted
 ];
+*/
