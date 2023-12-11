@@ -1,7 +1,5 @@
 import { runMain, sum, } from "../util.ts";
-import { count, } from "../iter_util.ts";
-import { map, } from "../iter_util2.ts";
-import { renderGrid } from "../d10/part2.ts";
+//import { renderGrid } from "../d10/part2.ts";
 
 export type Point = [x:number,y:number];
 export type Tile = "." | "#";
@@ -57,15 +55,15 @@ export async function main(lines:string[]) {
 
     const expanded = expandUniverse(skyMap);
 
-    console.log(renderGrid(expanded));
+    //console.log(renderGrid(expanded));
 
     const galaxyLocs = find(expanded);
 
-    console.log(galaxyLocs,galaxyLocs.length);
+    //console.log(galaxyLocs,galaxyLocs.length);
 
     const pairs = [...genPairs(galaxyLocs)]
 
-    console.log(pairs,pairs.length)
+    //console.log(pairs,pairs.length)
 
     const answer = sum(pairs ,([l,r]:Point[])=>manhattanDistance(l,r));
 
