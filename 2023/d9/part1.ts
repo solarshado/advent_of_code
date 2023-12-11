@@ -1,5 +1,5 @@
 import { runMain, sum } from "../util.ts";
-import { map } from "../iter_util2.ts";
+import { map } from "../iter_util.ts";
 
 export function allZero(ary:number[]) {
     return ary.every(v=>v===0);

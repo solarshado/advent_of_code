@@ -1,6 +1,5 @@
 import { runMain, sum, } from "../util.ts";
-import { count } from "../iter_util.ts";
-import { map } from "../iter_util2.ts";
+import { count, map } from "../iter_util.ts";
 import { } from './part1.ts';
 
 function foo() {

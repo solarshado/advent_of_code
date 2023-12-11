@@ -1,5 +1,5 @@
 import { runMain, } from "../util.ts";
-import { filter, count, reduce } from "../iter_util2.ts";
+import { filter, count, reduce } from "../iter_util.ts";
 import { } from './part1.ts';
 
 type Node = {

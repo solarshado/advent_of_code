@@ -1,5 +1,6 @@
 //import { readStringDelim } from "https://deno.land/std@0.105.0/io/mod.ts";
 
+/** @deprecated */
 export async function linesFrom(source:Deno.Reader = Deno.stdin):Promise<string[]> {
     const { readStringDelim } = await import("https://deno.land/std@0.105.0/io/mod.ts");
 
