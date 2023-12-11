@@ -1,5 +1,6 @@
 import { runMain, sum, } from "../util.ts";
-import { _getConnections, _getLoc, directionMap, getConnections, getLoc, parseGrid, PipeGrid, Point, pointsEqual, Tile, } from './part1.ts';
+import { Point, pointsEqual, setTile } from "../grid_util.ts";
+import { _getConnections, directionMap, getConnections, getLoc, parseGrid, PipeGrid, Tile, } from './part1.ts';
 
 function findLoop(grid:PipeGrid):Point[] {
     type Loc = {loc:Point, prevLoc?:Point};
@@ -33,14 +34,11 @@ function findLoop(grid:PipeGrid):Point[] {
     return loopSegments.map(s=>s.loc);
 }
 
-const getTileFrom = <T>([x,y]:Point,wallGrid:T[][])=> wallGrid[y][x];
-const setTile = <T>([x,y]:Point,wallGrid:T[][],t:T)=> wallGrid[y][x]= t;
-
 function countInsideLoop({tiles:grid, startPos}: PipeGrid, loop: Point[]):number {
     // replace S with a real tile
     {
         const cons = _getConnections(grid,startPos,directionMap)
-        
+
         for(const [t,f] of Object.entries(directionMap)) {
             const maybe = f(startPos);
             if(cons.length === maybe.length && cons.every((c,i)=>pointsEqual(c,maybe[i]))) {
@@ -99,15 +97,6 @@ function countInsideLoop({tiles:grid, startPos}: PipeGrid, loop: Point[]):number
 
     return sum(z1);
 }
-
-const renderGrid = (g:string[][])=>g.map(l=>l.join("")).join('\n');
-const renderPoints = (g:string[][],loop:Point[], char:string="*") => {
-    const copy = g.map(l=>[...l]);
-    for(const p of loop) {
-        setTile(p,copy,char)
-    }
-    return renderGrid(copy)
-};
 
 export async function main(lines:string[]) {
     const cleanedLines = lines.map(l=>l.trim()).filter(l=>l!='');

@@ -1,52 +1,44 @@
 import { runMain, } from "../util.ts";
-
-export type Point = [x:number,y:number];
-
-export function pointsEqual([lx,ly]:Point,[rx,ry]:Point):boolean {
-    const ret = lx == rx && ly == ry;
-    return ret;
-}
+import * as gu from "../grid_util.ts";
+import { Point, pointsEqual, } from "../grid_util.ts";
 
 export type Tile = "|" | "-" | "L" | "J" | "7" | "F" | "." | "S";
+export type Grid = gu.Grid<Tile>;
 
 export type DirectionMap<T extends string> = {
     [Prop in T]: (p:Point)=>Point[];
 }
 
 export const directionMap:DirectionMap<Tile> = {
-    "|" : ([x,y]:Point):Point[]=> [[x,y+1],[x,y-1]],
-    "-" : ([x,y]:Point):Point[]=> [[x+1,y],[x-1,y]],
-    "L" : ([x,y]:Point):Point[]=> [[x+1,y],[x,y-1]],
-    "J" : ([x,y]:Point):Point[]=> [[x-1,y],[x,y-1]],
-    "7" : ([x,y]:Point):Point[]=> [[x,y+1],[x-1,y]],
-    "F" : ([x,y]:Point):Point[]=> [[x,y+1],[x+1,y]],
-    "." : ([x,y]:Point):Point[]=> [],
+    "|" : ([x,y])=> [[x,y+1],[x,y-1]],
+    "-" : ([x,y])=> [[x+1,y],[x-1,y]],
+    "L" : ([x,y])=> [[x+1,y],[x,y-1]],
+    "J" : ([x,y])=> [[x-1,y],[x,y-1]],
+    "7" : ([x,y])=> [[x,y+1],[x-1,y]],
+    "F" : ([x,y])=> [[x,y+1],[x+1,y]],
+    "." : ([x,y])=> [],
 
-    "S" : ([x,y]:Point):Point[]=> [[x-1,y],[x,y-1], [x,y+1],[x+1,y]],
+    "S" : ([x,y])=> [[x-1,y],[x,y-1], [x,y+1],[x+1,y]],
 };
 
 export type PipeGrid = {
   startPos: Point,
-  tiles: Tile[][]
+  tiles: Grid
 }
 
 export function getLoc(grid:PipeGrid, p:Point):Tile {
-    return _getLoc(grid.tiles,p);
-}
-
-export function _getLoc<T>(grid:T[][] , [x,y]:Point):T {
-    return grid[y][x];
+    return gu.getTileFrom(p, grid.tiles);
 }
 
 export function getConnections(grid:PipeGrid, loc:Point):Point[] {
     return _getConnections(grid.tiles,loc,directionMap);
 }
 
-export function _getConnections<T extends string>(grid:T[][], loc:Point, directionMap:DirectionMap<T>):Point[] {
-    const tile = _getLoc(grid,loc);
+export function _getConnections<T extends string>(grid:gu.Grid<T>, loc:Point, directionMap:DirectionMap<T>):Point[] {
+    const tile = gu.getTileFrom(loc, grid);
 
-    const maxY = grid.length;
-    const maxX = grid[0].length;
+    const maxX = gu.maxX(grid);
+    const maxY = gu.maxY(grid);
 
     const outgoing =
         directionMap[tile](loc)
@@ -56,7 +48,7 @@ export function _getConnections<T extends string>(grid:T[][], loc:Point, directi
         return outgoing
 
     const returning = outgoing.filter(p=>
-                                      directionMap[_getLoc(grid, p)](p)
+                                      directionMap[gu.getTileFrom(p, grid)](p)
                                       .some(q => pointsEqual(q, loc))
                                      );
     //console.log("in getConnections",loc,tile,outgoing);
@@ -65,11 +57,10 @@ export function _getConnections<T extends string>(grid:T[][], loc:Point, directi
 
 export function parseGrid(lines:string[]):PipeGrid {
     let startPos:Point = [-1,-1];
-    const tiles = lines.map((l,y)=> l.split("").map((c,x)=>{
-        if(c === "S")
-            startPos = [x,y];
-        return c as Tile;
-    }));
+    const tiles = gu.parseGrid<Tile>(lines, (p,t)=>{
+        if(t === "S")
+            startPos = p;
+    });
     return {tiles, startPos};
 }
 
@@ -131,7 +122,6 @@ export function findLoops(grid:PipeGrid):number {
 
     return maxDepth;
 }
-
 
 export async function main(lines:string[]) {
     const cleanedLines = lines.map(l=>l.trim()).filter(l=>l!='');

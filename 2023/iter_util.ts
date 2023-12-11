@@ -4,6 +4,14 @@ export function* range(start:number, length:number) {
     yield n;
 }
 
+export function* genPairs<T>(list:T[]):IterableIterator<[T,T]> {
+    const len = list.length;
+
+    for(let l = 0 ; l < len - 1; ++l)
+        for(let r = l ; r < len; ++r)
+            yield [list[l],list[r]];
+}
+
 export function* concat<T>(...iters:Iterable<T>[]) {
     for(const iter of iters)
         yield* iter;

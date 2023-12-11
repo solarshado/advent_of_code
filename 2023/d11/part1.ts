@@ -1,23 +1,15 @@
 import { runMain, sum, } from "../util.ts";
+import { Grid as GenericGrid, parseGrid, findAll, manhattanDistance } from "../grid_util.ts";
+import { genPairs } from "../iter_util.ts";
 //import { renderGrid } from "../d10/part2.ts";
 
-export type Point = [x:number,y:number];
 export type Tile = "." | "#";
-export type _Grid<T> = T[][];
-export type Grid = _Grid<Tile>;
+export type Grid = GenericGrid<Tile>;
 
-export function parseMap(lines:string[]):Grid {
-    return lines.map(l=>l.split("") as Tile[]);
-}
-
-export function find(grid:Grid, tile:Tile = "#"):Point[] {
-    return grid.flatMap((line, y) =>
-                        line.reduce((acc, cur, x) => cur == tile ? (acc.push([x, y]), acc) : acc, [] as Point[])
-    );
-}
+export const findGalaxies = (g:Grid) => findAll(g,"#");
 
 export function expandUniverse(grid:Grid):Grid {
-    const galaxyLocs = find(grid,"#");
+    const galaxyLocs = findAll(grid,"#");
 
     const [xs,ys] = galaxyLocs.reduce((acc,[x,y])=> (acc[0].add(x), acc[1].add(y), acc),[new Set<number>(),new Set<number>()]);
 
@@ -30,26 +22,10 @@ export function expandUniverse(grid:Grid):Grid {
     return expandedAlongBoth;
 }
 
-export function* genPairs<T>(list:T[]):IterableIterator<[T,T]> {
-    const len = list.length;
-
-    for(let l = 0 ; l < len - 1; ++l)
-        for(let r = l ; r < len; ++r)
-            yield [list[l],list[r]];
-}
-
-export function manhattanDistance(l:Point, r:Point):number {
-    const [lx,ly] = l;
-    const [rx,ry] = r;
-    const dist = Math.abs(lx-rx) + Math.abs(ly-ry);
-    //console.log("distance",l,r,dist);
-    return dist;
-}
-
 export async function main(lines:string[]) {
     const cleanedLines = lines.map(l=>l.trim()).filter(l=>l!='');
 
-    const skyMap = parseMap(cleanedLines);
+    const skyMap = parseGrid<Tile>(cleanedLines);
 
     //console.log(renderGrid(skyMap));
 
@@ -57,7 +33,7 @@ export async function main(lines:string[]) {
 
     //console.log(renderGrid(expanded));
 
-    const galaxyLocs = find(expanded);
+    const galaxyLocs = findGalaxies(expanded);
 
     //console.log(galaxyLocs,galaxyLocs.length);
 
@@ -65,7 +41,7 @@ export async function main(lines:string[]) {
 
     //console.log(pairs,pairs.length)
 
-    const answer = sum(pairs ,([l,r]:Point[])=>manhattanDistance(l,r));
+    const answer = sum(pairs ,([l,r])=>manhattanDistance(l,r));
 
     console.log(answer);
 }

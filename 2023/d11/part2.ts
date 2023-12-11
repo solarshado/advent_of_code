@@ -1,10 +1,8 @@
 import { runMain, sum, } from "../util.ts";
-import { Grid, Point, Tile, find, genPairs, manhattanDistance, parseMap } from './part1.ts';
+import { genPairs } from "../iter_util.ts";
+import { Point, column, manhattanDistance, parseGrid } from "../grid_util.ts";
+import { Grid, Tile, findGalaxies, } from './part1.ts';
 //import { renderGrid, } from "../d10/part2.ts";
-
-function column(grid:Grid, x:number) {
-    return grid.map(line=>line[x]);
-}
 
 function isEmpty(tiles:Tile[]) {
     return !tiles.some(t=>t=="#");
@@ -25,15 +23,15 @@ function expandUniverse(grid:Grid, galaxies:Point[], amount=999_999):Point[] {
 export async function main(lines:string[]) {
     const cleanedLines = lines.map(l=>l.trim()).filter(l=>l!='');
 
-    const skyMap = parseMap(cleanedLines);
+    const skyMap = parseGrid<Tile>(cleanedLines);
 
-    const galaxyLocs = find(skyMap);
+    const galaxyLocs = findGalaxies(skyMap);
 
     const expandedLocs = expandUniverse(skyMap, galaxyLocs);
 
     const pairs = [...genPairs(expandedLocs)]
 
-    const answer = sum(pairs ,([l,r]:Point[])=>manhattanDistance(l,r));
+    const answer = sum(pairs ,([l,r])=>manhattanDistance(l,r));
 
     console.log(answer);
 }
