@@ -1,16 +1,19 @@
-import { runMain, sum, } from "../util.ts";
-import { count } from "../iter_util.ts";
-import { map } from "../iter_util2.ts";
+import { runMain, } from "../util.ts";
 
-export type Point = [x:number,y:number]
+export type Point = [x:number,y:number];
 
 export function pointsEqual([lx,ly]:Point,[rx,ry]:Point):boolean {
     const ret = lx == rx && ly == ry;
-    //console.log("in pointsEqual",lx,ly,rx,ry,ret);
     return ret;
 }
 
-export const directionMap = {
+export type Tile = "|" | "-" | "L" | "J" | "7" | "F" | "." | "S";
+
+export type DirectionMap<T extends string> = {
+    [Prop in T]: (p:Point)=>Point[];
+}
+
+export const directionMap:DirectionMap<Tile> = {
     "|" : ([x,y]:Point):Point[]=> [[x,y+1],[x,y-1]],
     "-" : ([x,y]:Point):Point[]=> [[x+1,y],[x-1,y]],
     "L" : ([x,y]:Point):Point[]=> [[x+1,y],[x,y-1]],
@@ -22,40 +25,40 @@ export const directionMap = {
     "S" : ([x,y]:Point):Point[]=> [[x-1,y],[x,y-1], [x,y+1],[x+1,y]],
 };
 
-type Tile = keyof typeof directionMap;
-
 export type PipeGrid = {
   startPos: Point,
   tiles: Tile[][]
 }
 
-export function getLoc(grid:PipeGrid, [x,y]:Point):Tile {
-    return grid.tiles[y][x];
+export function getLoc(grid:PipeGrid, p:Point):Tile {
+    return _getLoc(grid.tiles,p);
+}
+
+export function _getLoc<T>(grid:T[][] , [x,y]:Point):T {
+    return grid[y][x];
 }
 
 export function getConnections(grid:PipeGrid, loc:Point):Point[] {
-    const tile = getLoc(grid,loc);
+    return _getConnections(grid.tiles,loc,directionMap);
+}
 
-    const maxY = grid.tiles.length;
-    const maxX = grid.tiles[0].length;
+export function _getConnections<T extends string>(grid:T[][], loc:Point, directionMap:DirectionMap<T>):Point[] {
+    const tile = _getLoc(grid,loc);
 
-    const outgoing = directionMap[tile](loc).
-        filter(([x,y])=> x >= 0 && x < maxX && y >= 0 && y < maxY);
+    const maxY = grid.length;
+    const maxX = grid[0].length;
 
-    //console.log("in getConnections",loc,tile,outgoing);
+    const outgoing =
+        directionMap[tile](loc)
+        .filter(([x,y])=> x >= 0 && x < maxX && y >= 0 && y < maxY);
 
     if(tile !== "S")
         return outgoing
 
-    const returning = outgoing.filter(p=>{
-        //console.log("filtering returning",loc,tile,p);
-
-        const othersConnections = directionMap[getLoc(grid,p)](p)
-        //console.log("filtering returning",othersConnections);
-        const returning = othersConnections.some(q=>pointsEqual(q,loc));
-        //console.log("filtering returning",returning);
-        return returning;
-    });
+    const returning = outgoing.filter(p=>
+                                      directionMap[_getLoc(grid, p)](p)
+                                      .some(q => pointsEqual(q, loc))
+                                     );
     //console.log("in getConnections",loc,tile,outgoing);
     return returning;
 }
@@ -71,7 +74,7 @@ export function parseGrid(lines:string[]):PipeGrid {
 }
 
 /// DAMNIT full problem stack overflows
-export function __findLoops__(grid:PipeGrid) {
+export function __findLoops__(grid:PipeGrid):number {
     function step(grid:PipeGrid, curLoc:Point, depth:number, prevLoc:Point|null = null):number {
         const tile = getLoc(grid,curLoc)
         console.log("step",curLoc,tile,depth);
@@ -93,7 +96,8 @@ export function __findLoops__(grid:PipeGrid) {
     return step(grid, grid.startPos, 0);
 }
 
-export function findLoops(grid:PipeGrid) {
+// misnamed... oh well
+export function findLoops(grid:PipeGrid):number {
     type Loc = {loc:Point, depth:number, prevLoc?:Point};
 
     const locs:Loc[] = [{loc: grid.startPos, depth: 0 }];
@@ -132,39 +136,13 @@ export function findLoops(grid:PipeGrid) {
 export async function main(lines:string[]) {
     const cleanedLines = lines.map(l=>l.trim()).filter(l=>l!='');
     
-     /*
-    const test = Object.entries(directionMap).map(([s,f])=> {
-        const g = [
-            [" "," "," "],
-            [" ",s," "],
-            [" "," "," "]
-        ];
-
-        const deltas = f([1,1]);
-
-        for(const [x,y] of deltas)
-            g[y][x] = "!"
-
-        return g;
-    });
-
-    for( const [r1,r2,r3] of test){
-        console.log(r1);
-        console.log(r2);
-        console.log(r3);
-        console.log("               ");
-    }
-
-    return;
-   //  */
-
     const grid = parseGrid(cleanedLines);
 
     console.log(grid);
 
-    const answer = findLoops(grid);
+    const answer = findLoops(grid) / 2;
 
-    console.log(answer/2);
+    console.log(answer);
 }
 
 if(import.meta.main)
