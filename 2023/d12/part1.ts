@@ -1,7 +1,7 @@
 import { runMain, sum, } from "../util.ts";
-import { count, map, filter, reduce } from "../iter_util.ts";
+import { count, filter, } from "../iter_util.ts";
 
-type Tile="#"|"."|"?";
+export type Tile="#"|"."|"?";
 
 export type PuzzleLine = {
     record:Tile[],
@@ -20,15 +20,19 @@ export function* getCandidates(sequence:Tile[]):IterableIterator<Tile[]> {
 
     const bitMax = (2**unknowns.length) - 1
 
-    // so gross... but fast to write
-    const getBits = (n:number)=> n.toString(2).padStart(unknowns.length,"0").split("").map(d=> d === "1");
+    //console.log("getCandidates unknowns bitMax",unknowns,bitMax);
 
-    console.log("unknowns", unknowns, "bits.len", getBits(bitMax).length);
+    // so gross... but fast to write
+//    const getBits = (n:number)=> n.toString(2).padStart(unknowns.length,"0").split("").map(d=> d === "1");
+    const getBits = (n:number)=> (bit:number) => (n >> bit) & 1;
+
+    //console.log("unknowns", unknowns, "bits.len", getBits(bitMax).length);
 
     const reify = (bits:ReturnType<typeof getBits>)=> {
         const ret = [...sequence];
 
-        bits.forEach((b,i)=>ret[unknowns[i]] = b ? "#" : ".");
+        //bits.forEach((b,i)=>ret[unknowns[i]] = b ? "#" : ".");
+        ret.forEach((_,i)=>ret[unknowns[i]] = bits(i) ? "#" : ".");
 
         return ret;
     };
