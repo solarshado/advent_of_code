@@ -4,6 +4,12 @@ export function* range(start:number, length:number) {
     yield n;
 }
 
+export function* repeat<T>(value:T, count:number) {
+    while(--count >= 0){
+        yield value;
+    }
+}
+
 export function* genPairs<T>(list:T[]):IterableIterator<[T,T]> {
     const len = list.length;
 
@@ -14,6 +20,10 @@ export function* genPairs<T>(list:T[]):IterableIterator<[T,T]> {
 
 export function count(iter:Iterable<unknown>) {
   return reduce((acc, _) => acc + 1, 0, iter);
+}
+
+export function toArray<T>(iter:Iterable<T>):T[] {
+    return [...iter];
 }
 
 export function* concat<T>(...iters:Iterable<T>[]) {

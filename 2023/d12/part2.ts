@@ -1,11 +1,6 @@
 import { runMain, sum, } from "../util.ts";
+import { repeat } from '../iter_util.ts';
 import { PuzzleLine, Tile, parsePuzzleLine } from './part1.ts';
-
-function* repeat<T>(value:T, count:number) {
-    while(--count >= 0){
-        yield value;
-    }
-}
 
 function unfold({groups,record}:PuzzleLine):PuzzleLine {
     const newGroups= [...repeat(groups,5)].flat();
@@ -20,15 +15,6 @@ function unfold({groups,record}:PuzzleLine):PuzzleLine {
 }
 
 /*
-function arraysEqual<T>(l:T[], r:T[]):boolean {
-    return l.length == r.length &&
-        l.every((e,i)=> e === r[i]);
-}
-
-function toArray<T>(iter:Iterable<T>):T[] {
-    return [...iter];
-}
-
 function _countPossibleSolutions({groups,record}:PuzzleLine):number {
     const candidates = getCandidates(record);
 
@@ -70,7 +56,7 @@ function* getBitPatterns(bits:number):boolean[] {
 function countPossibleSolutions({groups,record:tiles}:PuzzleLine, doLog=false):number {
     const log = doLog ?
         (...z:unknown[]) => console.log(...z) :
-        (...z:unknown[]) => {};
+        (..._:unknown[]) => {};
 
     const cache = new Map<string,number>();
 

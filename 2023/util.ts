@@ -62,6 +62,11 @@ function* _intersect<T>(larger:Set<T>, smaller:Set<T>) {
             yield item;
 }
 
+export function arraysEqual<T>(l:T[], r:T[]):boolean {
+    return l.length == r.length &&
+        l.every((e,i)=> e === r[i]);
+}
+
 // these 3 stolen from https://stackoverflow.com/a/61352020/
 export const gcd = (a:number, b:number):number => b == 0 ? a : gcd(b, a % b)
 export const lcm = (a:number, b:number) =>  a / gcd(a, b) * b
