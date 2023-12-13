@@ -30,6 +30,10 @@ export function parseGrid<T>(lines:string[], callback?:(pos:Point,tile:T)=>void)
     }
 }
 
+export function transpose<T>(g:Grid<T>):Grid<T> {
+    return g[0].map((_,i)=>column(g,i));
+}
+
 export function maxY(grid:Grid<unknown>):number {
   return grid.length;
 }

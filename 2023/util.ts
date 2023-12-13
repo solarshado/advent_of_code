@@ -67,6 +67,13 @@ export function arraysEqual<T>(l:T[], r:T[]):boolean {
         l.every((e,i)=> e === r[i]);
 }
 
+export function countDifferingElements<T>(l:T[], r:T[]):number {
+    // TODO? allow differing lengths?
+    return l.length == r.length ?
+        l.reduce((acc,curL,i)=> acc + (curL === r[i] ? 0 : 1), 0) :
+        Math.max(l.length,r.length)
+}
+
 // these 3 stolen from https://stackoverflow.com/a/61352020/
 export const gcd = (a:number, b:number):number => b == 0 ? a : gcd(b, a % b)
 export const lcm = (a:number, b:number) =>  a / gcd(a, b) * b

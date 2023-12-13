@@ -1,6 +1,5 @@
 import { runMain, arraysEqual, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
-import { Grid as AbstractGrid, column, maxX, maxY, parseGrid, renderGrid, } from '../grid_util.ts';
+import { Grid as AbstractGrid, maxY, parseGrid, renderGrid, transpose, } from '../grid_util.ts';
 
 export type Tile = "."|"#";
 export type Grid = AbstractGrid<Tile>
@@ -8,10 +7,6 @@ export type Grid = AbstractGrid<Tile>
 export type Mirror = {
     position:number,
     orientation:"H"|"V",
-}
-
-export function transpose(g:Grid):Grid {
-    return g[0].map((_,i)=>column(g,i));
 }
 
 function findMirror(pattern:Grid):Mirror {

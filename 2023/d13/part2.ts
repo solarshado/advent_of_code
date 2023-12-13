@@ -1,13 +1,6 @@
-import { arraysEqual, runMain, sum, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
-import { column, maxX, maxY, parseGrid, renderGrid } from "../grid_util.ts";
-import { Tile, Grid, Mirror, transpose, } from './part1.ts';
-
-function arrayEqualErrors<T>(l:T[], r:T[]):number {
-    return l.length == r.length ?
-        l.reduce((acc,curL,i)=> acc + (curL === r[i] ? 0 : 1), 0) :
-        Math.max(l.length,r.length)
-}
+import { countDifferingElements, runMain, } from "../util.ts";
+import { maxY, parseGrid, renderGrid, transpose } from "../grid_util.ts";
+import { Grid, Mirror, } from './part1.ts';
 
 type SmudgedMirror = Mirror & {errors:number};
 
@@ -28,7 +21,7 @@ function findMirror(pattern:Grid):SmudgedMirror[] {
             const cur = pattern[y];
             const last = pattern[y-1];
 
-            const initErrors = arrayEqualErrors(cur,last);
+            const initErrors = countDifferingElements(cur,last);
 
             if(initErrors <= maxErrors) {
                 let errors = initErrors;
@@ -42,7 +35,7 @@ function findMirror(pattern:Grid):SmudgedMirror[] {
 
                     console.log("findMirror; checking delta",delta,"\n+1",next.join(""),"\n-1",prev.join(""))
 
-                    errors += arrayEqualErrors(next,prev)
+                    errors += countDifferingElements(next,prev)
 
                     if(errors > maxErrors) break;
                 }
@@ -75,14 +68,6 @@ export async function main(lines:string[]) {
     }, [[]] as string[][]).filter(p=>p.length!==0);
 
     console.log(patterns);
-
-    /*
-    for(const p of patterns.map((p)=>parseGrid<Tile>(p))) {
-        const tr = transpose(p);
-        console.log("P\n"+renderGrid(p)+"\n v v v\n"+renderGrid(tr));
-    }
-    return;
-    */
 
     const mirrors = patterns.map(p=>findMirror(parseGrid(p)));
 
