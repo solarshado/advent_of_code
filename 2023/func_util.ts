@@ -32,3 +32,13 @@ export function memozie<
 
     return memd;
 }
+
+export function pipe<A,B>(data:A, f1:(a:A)=>B):B;
+export function pipe<A,B,C>(data:A, f1:(a:A)=>B, f2:(b:B)=>C):C;
+export function pipe<A,B,C,D>(data:A, f1:(a:A)=>B, f2:(b:B)=>C, f3:(c:C)=>D):D;
+export function pipe<A,B,C,D,E>(data:A, f1:(a:A)=>B, f2:(b:B)=>C, f3:(c:C)=>D, f4:(d:D)=>E):E;
+// TODO more?
+
+export function pipe(data:unknown, ...funcs:Array<(input:unknown)=>unknown>):unknown {
+    return funcs.reduce((acc,cur)=>cur(acc), data);
+}
