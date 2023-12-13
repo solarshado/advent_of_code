@@ -1,6 +1,6 @@
 import { runMain, arraysEqual, } from "../util.ts";
 import { count, map } from "../iter_util.ts";
-import { Grid as AbstractGrid, column, maxX, maxY, parseGrid, } from '../grid_util.ts';
+import { Grid as AbstractGrid, column, maxX, maxY, parseGrid, renderGrid, } from '../grid_util.ts';
 
 export type Tile = "."|"#";
 export type Grid = AbstractGrid<Tile>
@@ -10,70 +10,53 @@ export type Mirror = {
     orientation:"H"|"V",
 }
 
-function findMirror(pattern:Grid):Mirror[] {
-    const mY = maxY(pattern)
-    const mX = maxX(pattern)
+export function transpose(g:Grid):Grid {
+    return g[0].map((_,i)=>column(g,i));
+}
 
-    const mirrors:Mirror[] = [];
+function findMirror(pattern:Grid):Mirror {
 
-    console.log("findMirror, searching","\n"+pattern.map(l=>l.join("")).join("\n"));
+    //const horiz = search(pattern);
+    //const vert = search(transpose(pattern)).map(m=>({...m, orientation: "V"} as Mirror));
 
-    for(let y = 1; y < mY; ++y) {
-        const cur = pattern[y];
-        const last = pattern[y-1];
+    return search(pattern) ??
+        (m=>({...m, orientation: "V"}))(search(transpose(pattern))!);
 
-        if(arraysEqual(cur,last)) {
-            let valid = true;
-            const range = Math.min(y, mY-y);
-            console.log("findMirror; checking y",y,"range",range);
+    function search(pattern:Grid):Mirror|null {
+        console.log("findMirror, searching","\n"+renderGrid(pattern));
 
-            for(let delta = 0; delta < range; ++delta){
-                const next = pattern[y+delta];
-                const prev = pattern[(y-1)-delta];
+        const mY = maxY(pattern)
+        //const mX = maxX(pattern)
 
-            console.log("findMirror; checking delta",delta,"\n+1",next.join(""),"\n-1",prev.join(""))
+        for(let y = 1; y < mY; ++y) {
+            const cur = pattern[y];
+            const last = pattern[y-1];
 
-                if(!arraysEqual(next,prev)) {
-                    valid = false; break;
+            if(arraysEqual(cur,last)) {
+                let valid = true;
+                const range = Math.min(y, mY-y);
+                console.log("findMirror; checking y",y,"range",range);
+
+                for(let delta = 0; delta < range; ++delta){
+                    const next = pattern[y+delta];
+                    const prev = pattern[(y-1)-delta];
+
+                    console.log("findMirror; checking delta",delta,"\n+1",next.join(""),"\n-1",prev.join(""))
+
+                    if(!arraysEqual(next,prev)) {
+                        valid = false; break;
+                    }
                 }
+
+                if(valid)
+                    return {
+                        orientation: "H",
+                        position: y,
+                    };
             }
-
-            if(valid)
-            mirrors.push({
-                orientation: "H",
-                position: y,
-            });
         }
+        return null;
     }
-/// why didn't I just transpose.....
-    for(let x = 1; x < mX; ++x) {
-        const cur = column(pattern,x);
-        const last = column(pattern,x-1);
-
-        if(arraysEqual(cur,last)) {
-            let valid = true
-            const range = Math.min(x, mX-x);
-            console.log("findMirror; checking x",x,"range",range);
-
-            for(let delta = 0; delta < range; ++delta){
-                const next = column(pattern,x+delta);
-                const prev = column(pattern,(x-1)-delta);
-
-            console.log("findMirror; checking delta",delta,"\n+1",next.join(""),"\n-1",prev.join(""))
-
-                if(!arraysEqual(next,prev)) {
-                    valid = false; break;
-                }
-            }
-
-            if(valid)
-                mirrors.push({
-                    orientation: "V",
-                    position: x,
-                });
-        }
-    }
-    return mirrors;
 }
 
 export async function main(lines:string[]) {
