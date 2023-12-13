@@ -15,45 +15,6 @@ function unfold({groups,record}:PuzzleLine):PuzzleLine {
     }
 }
 
-/*
-function _countPossibleSolutions({groups,record}:PuzzleLine):number {
-    const candidates = getCandidates(record);
-
-    //console.log("gen'd candidates",toArray(getCandidates(record)));
-
-    //const strs = map(candidates, c=>c.join(""));
-    //const chunkSizes = map(strs, s=>s.split(/\.+/).map(c=>c.length));
-
-    const chunkSizes = map(candidates, c=> c.reduce((acc, cur) => {
-        if(cur === "#")
-            acc[acc.length-1] += 1;
-        else if(cur === "." && acc.at(-1) != 0)
-            acc.push(0);
-
-        return acc;
-    },[] as number[]));
-
-    const goodChunks = filter(chunkSizes, ary=> arraysEqual(ary,groups));
-
-    return count(goodChunks);
-}
-*/
-
-/*
-function* getBitPatterns(bits:number):boolean[] {
-    const bitMax = (2**bits) - 1
-
-    const getBits = (n:number)=> (bit:number) => (n >> bit) & 1;
-
-    for(let i = 0; i <= bitMax; ++i)
-    {
-        const curBits = getBits(i);
-        //console.log("candidate",curBits,re.join(""));
-        yield re;
-    }
-}
-*/
-
 function countPossibleSolutions({groups,record:tiles}:PuzzleLine, doLog=false):number {
     const log = doLog ?
         (...z:unknown[]) => console.log(...z) :
@@ -74,6 +35,7 @@ function countPossibleSolutions({groups,record:tiles}:PuzzleLine, doLog=false):n
     return r;
 
     /*
+    // doesn't quite work, have yet to figure out why; misses some cases
     function new_search(tileIdx:number, groupIdx:number, groupProgress:number):number {
         //log("search",tiles.join(""),groups,prevT);
 
@@ -140,7 +102,6 @@ function countPossibleSolutions({groups,record:tiles}:PuzzleLine, doLog=false):n
     }
     */
 
-    // /*
     function first_search(tiles:Tile[], groups:number[], prevT:Tile):number {
         log("search",tiles.join(""),groups,prevT);
 
@@ -191,7 +152,6 @@ function countPossibleSolutions({groups,record:tiles}:PuzzleLine, doLog=false):n
         }
         else throw "Bad Tile!";
     }
-    // */
 }
 
 export async function main(lines:string[]) {
