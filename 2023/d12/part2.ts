@@ -1,5 +1,6 @@
 import { runMain, sum, } from "../util.ts";
 import { repeat } from '../iter_util.ts';
+import { memozie } from "../func_util.ts";
 import { PuzzleLine, Tile, parsePuzzleLine } from './part1.ts';
 
 function unfold({groups,record}:PuzzleLine):PuzzleLine {
@@ -58,10 +59,12 @@ function countPossibleSolutions({groups,record:tiles}:PuzzleLine, doLog=false):n
         (...z:unknown[]) => console.log(...z) :
         (..._:unknown[]) => {};
 
-    const cache = new Map<string,number>();
-
     const _search = first_search;
-    const search = memodSearch;
+
+    const search = memozie(_search,
+                           (tiles,groups,prevT) =>
+                                [tiles.join(""),groups.join(),prevT].join("|"));
+
     const r = search(tiles,groups,'.');
 
     //const r = search(0,0,0);
@@ -69,18 +72,6 @@ function countPossibleSolutions({groups,record:tiles}:PuzzleLine, doLog=false):n
     // deno-lint-ignore no-debugger
     //debugger;
     return r;
-
-    //function memodSearch(tileIdx:number, groupIdx:number, groupProgress:number):number {
-        //const key = [tileIdx,groupIdx,groupProgress].join(",");
-    function memodSearch(tiles:Tile[], groups:number[], prevT:Tile):number {
-        const key = [tiles.join(""),groups.join(),prevT].join("|");
-
-        if(!cache.has(key))
-           // cache.set(key, _search(tileIdx, groupIdx, groupProgress));
-            cache.set(key, _search(tiles,groups,prevT));
-
-        return cache.get(key)!;
-    }
 
     /*
     function new_search(tileIdx:number, groupIdx:number, groupProgress:number):number {
