@@ -1,5 +1,4 @@
-import { runMain, sum, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
+import { runMain, } from "../util.ts";
 import { Grid as AbstractGrid, parseGrid, renderGrid, transpose, } from "../grid_util.ts"
 import { pipe } from "../func_util.ts";
 
