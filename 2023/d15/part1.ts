@@ -1,11 +1,6 @@
 import { runMain, sum, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
 
-export type Foo = {
-    TODO:unknown,
-};
-
-function hash(s:string): number {
+export function hash(s:string): number {
     return s.split("").reduce((acc,cur)=> {
         acc += cur.charCodeAt(0);
         acc *= 17;

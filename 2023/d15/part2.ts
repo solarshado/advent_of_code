@@ -1,39 +1,32 @@
 import { runMain, sum, } from "../util.ts";
-import { count, filter, map, reduce } from "../iter_util.ts";
+import { filter, map, } from "../iter_util.ts";
 import { hash as hashFunc } from './part1.ts';
 
 type Step = {
     label:string,
     hash:number,
-    op:"-"|"=",
-} & ( {op:"-"} | {op:"=", fl:number });
+} & ({op:"-"} | {op:"=", fl:number });
 
-class Lens  {
-    constructor(
-        public readonly label:string,
-        public readonly fl:number,
-    ) {}
-    toString() { return `[${this.label} ${this.fl}]`; }
-    [Symbol.for("Deno.customInspect")]() { return this.toString(); }
-}
-
-/*
-type Box = {
-    id:number,
-    lenses:Lens[],
-}*/
-
-function parseStep(s:string): Step {
+function parseStep(s:string):Step {
     const [_,label,opRaw] = Array.from(/([a-z]+)(-|=\d)/.exec(s)!);
     const hash = hashFunc(label);
 
     const op = opRaw[0] as "-"|"=";
 
-    return op === "=" ? {label, hash, op, fl: +opRaw.charAt(1) } : {label, hash, op, };
+    return op === "=" ? {label, hash, op, fl: +opRaw[1] } : {label, hash, op, };
 }
 
 function stringifyStep(s:Step) {
     return s.label+s.op+(s.op === "=" ? s.fl : "")
+}
+
+class Lens {
+    constructor(
+        public readonly label:string,
+        public readonly fl:number,
+    ) {}
+    //toString() { return `[${this.label} ${this.fl}]`; }
+    //[Symbol.for("Deno.customInspect")]() { return this.toString(); }
 }
 
 class Box {
@@ -57,9 +50,7 @@ class AutovivifyingArray<T> {
     }
 
     *[Symbol.iterator]() { yield* this.#inner; }
-    [Symbol.for("Deno.customInspect")]() {
-        return Deno.inspect(this.#inner);
-    }
+    //[Symbol.for("Deno.customInspect")]() { return Deno.inspect(this.#inner); }
 }
 
 function doSteps<T extends {get(i:number):Box}>(steps:Step[], boxes:T):T {
@@ -72,7 +63,7 @@ function doSteps<T extends {get(i:number):Box}>(steps:Step[], boxes:T):T {
         */
     }
 
-    return boxes//?
+    return boxes;
 
     function doStep(step:Step) {
         const {
@@ -84,22 +75,17 @@ function doSteps<T extends {get(i:number):Box}>(steps:Step[], boxes:T):T {
         const box = boxes.get(boxId);
 
         if(operation === "-") {
-            // remove lens `label` from box `box` (if it is there)
-            // then move all remaing lenses forward
             box.lenses = box.lenses.filter(l=>l.label != label);
-        } else if(operation === "="){
+        }
+        else if(operation === "=") {
             const {fl} = step;
 
-            // l = new Lens(focalLen, label)
-            const l:Lens = new Lens(label, fl);
+            const l = new Lens(label, fl);
 
             const found = box.lenses.findIndex(l=> l.label == label);
-            // if `label` in `box`:
-            //  `box`[`label`] = l;
+
             if(found !== -1)
                 box.lenses[found] = l;
-            // else
-            //  `box`.append(`l`)
             else
                 box.lenses.push(l);
         }
@@ -108,24 +94,16 @@ function doSteps<T extends {get(i:number):Box}>(steps:Step[], boxes:T):T {
 
         //console.log("doStep; done",stringifyStep(step),box);
     }
-
 }
 
 export async function main(lines:string[]) {
     const fullInput = lines.map(l=>l.trim()).filter(l=>l!='').join("");
 
-    const steps:Step[] = fullInput.split(",").map(parseStep);
+    const steps = fullInput.split(",").map(parseStep);
 
     console.log(steps);
 
-    const boxes = new AutovivifyingArray(Box);
-
-    doSteps(steps,boxes);
-
-    /*
-    for(const box of boxes)
-        console.log(box);
-        */
+    const boxes = doSteps(steps,new AutovivifyingArray(Box));
 
     const focusingPower = map(filter(boxes, b=>!!b), ({id,lenses})=>lenses.map((l,i)=>(id+1)*(i+1)*l.fl));
 
