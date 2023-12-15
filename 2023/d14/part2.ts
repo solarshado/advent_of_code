@@ -1,15 +1,8 @@
 import { runMain, } from "../util.ts";
 import { memozie, pipe, memoCacheSym } from '../func_util.ts';
 import { Tile, Grid, calcTotalLoad, rollStonesNorth } from './part1.ts';
-import { column, parseGrid, renderGrid, } from "../grid_util.ts";
+import { parseGrid, renderGrid, rotateGrid90DegCW, } from "../grid_util.ts";
 
-export function rotateGrid90DegCW(grid:Grid):Grid {
-    // assume square
-    if(grid.length != grid[0].length)
-        throw "rotate only implemented for square grids, time to fix that";
-
-    return grid.map((_,y)=>column(grid,y).toReversed());
-}
 
 function _spinCycle(grid:Grid):Grid {
     return pipe(grid,

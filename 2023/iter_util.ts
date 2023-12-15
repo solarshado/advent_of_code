@@ -1,3 +1,4 @@
+import { Mapper, Predicate, Reducer } from "./func_util.ts";
 
 export function* range(start:number, length:number) {
     for(let n = start; n < start+length; ++n)
@@ -35,10 +36,6 @@ export function isIterable(o: unknown): o is Iterable<unknown> {
     return !!o && typeof o == "object" && Symbol.iterator in o;
 }
 
-// TODO move these elsewhere (to util.ts?)
-export type Mapper<T,U> = (t:T)=>U;
-export type Predicate<T> = Mapper<T,boolean>;
-export type Reducer<T,U> = (acc:T,cur:U)=>T;
 
 type MapParam<T,U> = Mapper<T,U> | Iterable<T>;
 

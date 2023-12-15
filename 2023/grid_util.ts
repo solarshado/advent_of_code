@@ -34,6 +34,14 @@ export function transpose<T>(g:Grid<T>):Grid<T> {
     return g[0].map((_,i)=>column(g,i));
 }
 
+export function rotateGrid90DegCW<T>(grid:Grid<T>):Grid<T> {
+    // assume square
+    if(grid.length != grid[0].length)
+        throw "rotate only implemented for square grids, time to fix that";
+
+    return grid.map((_,y)=>column(grid,y).toReversed());
+}
+
 export function maxY(grid:Grid<unknown>):number {
   return grid.length;
 }

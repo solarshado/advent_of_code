@@ -1,5 +1,7 @@
 //import { readStringDelim } from "https://deno.land/std@0.105.0/io/mod.ts";
 
+import { Predicate } from "./func_util.ts";
+
 /** @deprecated */
 export async function linesFrom(source:Deno.Reader = Deno.stdin):Promise<string[]> {
     const { readStringDelim } = await import("https://deno.land/std@0.105.0/io/mod.ts");
@@ -72,6 +74,31 @@ export function countDifferingElements<T>(l:T[], r:T[]):number {
     return l.length == r.length ?
         l.reduce((acc,curL,i)=> acc + (curL === r[i] ? 0 : 1), 0) :
         Math.max(l.length,r.length)
+}
+
+export function splitArray<T>(src:T[], pred:Predicate<T>):T[][]
+export function splitArray<T>(src:T[], elem:T):T[][]
+
+export function splitArray<T>(src:T[], splitter:T|Predicate<T>):T[][] {
+    const pred =
+        typeof splitter !== "function" ?
+        (t:T)=>t===splitter :
+        splitter as Predicate<T>;
+
+    return src.reduce((acc,cur)=>{
+        if(pred(cur)) {
+            acc.push([]);
+        }
+        else {
+            acc.at(-1)!.push(cur)
+        }
+
+        return acc;
+    },[[]] as T[][])
+}
+
+export function joinArrays<T>(src:T[][], elem:T):T[] {
+    return src.reduce((l,r)=>l.concat(elem, ...r));
 }
 
 // these 3 stolen from https://stackoverflow.com/a/61352020/

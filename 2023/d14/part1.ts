@@ -1,20 +1,18 @@
-import { runMain, } from "../util.ts";
-import { Grid as AbstractGrid, parseGrid, renderGrid, transpose, } from "../grid_util.ts"
+import { runMain, splitArray, joinArrays, } from "../util.ts";
 import { pipe } from "../func_util.ts";
+import { Grid as AbstractGrid, parseGrid, renderGrid, transpose, } from "../grid_util.ts"
 
 export type Tile = "."|"O"|"#";
 export type Grid = AbstractGrid<Tile>;
 
 export function rollStonesNorth(input:Grid):Grid {
-    //TODO make split(array)array[]
-
     function rollToEnd(line:Tile[]):Tile[] {
-        return (line
-            .join("").split("#")
-            .map(segment=>segment.split("").sort((a,b)=> a === "O" ? -1 : 0).join(""))
-            .join("#")
-            .split("")
-        ) as Tile[];
+        const sep = "#";
+        return pipe(line,
+            (l)=>splitArray(l,sep)
+                .map(segment=>segment.sort((a,b)=> a === "O" ? -1 : 0)),
+            (a)=>joinArrays(a,sep)
+       );
     }
 
     return pipe(input,
