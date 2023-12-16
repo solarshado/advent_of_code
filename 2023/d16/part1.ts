@@ -1,5 +1,5 @@
-import { runMain, sum, } from "../util.ts";
-import { count, map, toArray } from "../iter_util.ts";
+import { runMain, } from "../util.ts";
+import { map, toArray } from "../iter_util.ts";
 import { parseGrid, Point, Grid as AbstractGrid, renderGrid, pointToKey, getTileFrom, addPoints, isPointOnGrid, renderPoints } from "../grid_util.ts"
 import { pipe } from "../func_util.ts";
 
