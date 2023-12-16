@@ -5,9 +5,11 @@ export function pointsEqual([lx,ly]:Point,[rx,ry]:Point):boolean {
     return ret;
 }
 
-export function manhattanDistance(l:Point, r:Point):number {
-    const [lx,ly] = l;
-    const [rx,ry] = r;
+export function addPoints([lx,ly]:Point,[rx,ry]:Point):Point {
+    return [lx+rx,ly+ry];
+}
+
+export function manhattanDistance([lx,ly]:Point, [rx,ry]:Point):number {
     const dist = Math.abs(lx-rx) + Math.abs(ly-ry);
     return dist;
 }
@@ -16,7 +18,7 @@ export function pointToKey([x,y]:Point):string {
     return x+","+y
 }
 
-export type Grid<T=string> = T[][];
+export type Grid<T> = T[][];
 
 export function parseGrid<T>(lines:string[], callback?:(pos:Point,tile:T)=>void):Grid<T> {
     if(typeof callback == "undefined")
@@ -30,8 +32,8 @@ export function parseGrid<T>(lines:string[], callback?:(pos:Point,tile:T)=>void)
     }
 }
 
-export function transpose<T>(g:Grid<T>):Grid<T> {
-    return g[0].map((_,i)=>column(g,i));
+export function transpose<T>(grid:Grid<T>):Grid<T> {
+    return grid[0].map((_,i)=>column(grid,i));
 }
 
 export function rotateGrid90DegCW<T>(grid:Grid<T>):Grid<T> {
@@ -42,12 +44,27 @@ export function rotateGrid90DegCW<T>(grid:Grid<T>):Grid<T> {
     return grid.map((_,y)=>column(grid,y).toReversed());
 }
 
-export function maxY(grid:Grid<unknown>):number {
+/** @deprecated */
+export const maxY = gridHeight;
+
+export function gridHeight(grid:Grid<unknown>):number {
   return grid.length;
 }
 
-export function maxX(grid:Grid<unknown>):number {
+/** @deprecated */
+export const maxX = gridWidth;
+
+export function gridWidth(grid:Grid<unknown>):number {
   return grid[0].length;
+}
+
+export function isPointOnGrid([x,y]:Point, grid:Grid<unknown>):boolean {
+    return (
+        y >= 0 &&
+        x >= 0 &&
+        y < gridHeight(grid) &&
+        x < gridWidth(grid)
+    );
 }
 
 export function column<T>(grid:Grid<T>, x:number) {
@@ -72,14 +89,14 @@ export function findAll<T>(grid:Grid<T>, tile:T):Point[] {
                        );
 }
 
-export function renderGrid<T>(g:Grid<T>) {
-  return g.map(l => l.join("")).join('\n');
+export function renderGrid<T>(grid:Grid<T>) {
+  return grid.map(l => l.join("")).join('\n');
 }
 
-export function renderPoints<T>(g:Grid<T>, loop:Point[], char:T) {
-  const copy = g.map(l => [...l]);
-  for (const p of loop) {
-    setTile(p, copy, char);
+export function renderPoints<T>(grid:Grid<T>, points:Iterable<Point>, tile:T) {
+  const copy = grid.map(l => [...l]);
+  for (const p of points) {
+    setTile(p, copy, tile);
   }
   return renderGrid(copy);
 }
