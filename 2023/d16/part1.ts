@@ -79,7 +79,7 @@ export function doTraversal(grid:Grid, startState:State):Set<State> {
             loc: addPoints(loc, directionMap[d]),
             dir: d
         }));
-        console.log("visited",loc,curTile,"from",dir, "adding:",next);
+        //console.log("visited",loc,curTile,"from",dir, "adding:",next);
         return next;
     }
 }
