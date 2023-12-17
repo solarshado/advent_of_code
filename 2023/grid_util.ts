@@ -93,8 +93,8 @@ export function renderGrid<T>(grid:Grid<T>) {
   return grid.map(l => l.join("")).join('\n');
 }
 
-export function renderPoints<T>(grid:Grid<T>, points:Iterable<Point>, tile:T) {
-  const copy = grid.map(l => [...l]);
+export function renderPoints<T>(grid:Grid<T>, points:Iterable<Point>, tile:string) {
+  const copy = (grid as Grid<T|string>).map(l => [...l]);
   for (const p of points) {
     setTile(p, copy, tile);
   }
