@@ -1,10 +1,14 @@
 import { runMain, sum, } from "../util.ts";
-import { parseGrid, Point, Grid as AbstractGrid, renderGrid, pointToKey, getTileFrom, addPoints, isPointOnGrid, renderPoints, pointsEqual, gridWidth, gridHeight, setTile } from "../grid_util.ts"
+import { parseGrid, Point, Grid as AbstractGrid, renderGrid, pointToKey, getTileFrom, addPoints, isPointOnGrid, pointsEqual, gridWidth, gridHeight, setTile } from "../grid_util.ts"
 import { Mapper, Predicate, pipe } from "../func_util.ts";
 import { filter, map, reduce, toArray } from "../iter_util.ts";
 
 export type Tile = number;
 export type Grid = AbstractGrid<Tile>;
+
+export function getTileValue(grid:Grid, loc:Point):number {
+    return +getTileFrom(loc,grid);
+}
 
 export const DIRECTIONS = ["U","D","L","R"] as const;
 export type Direction = typeof DIRECTIONS[number];
@@ -99,7 +103,7 @@ export function withPointsReplaced<T>(grid:AbstractGrid<T>, points:Iterable<Poin
   return copy;
 }
 
-type Node = {
+export type Node = {
     location:Point,
     //edges:{ [key in Direction]:Edge[] },
     edges:Edge<Node>[],
@@ -112,11 +116,11 @@ type EdgeLength = typeof edgeLengths[number];
 
 type EdgeEnd = Node|Point;
 
-type Edge<TStart extends EdgeEnd = Node, TEnd extends EdgeEnd = Node> = {
+export type Edge<TStart extends EdgeEnd = Node, TEnd extends EdgeEnd = Node> = {
     start:TStart,
     end:TEnd,
     direction:Direction,
-    distance:EdgeLength,
+    distance:EdgeLength|number,
     traversalCost:number,
 };
 
@@ -128,7 +132,23 @@ type NodeFactory = {
     _dumpEdges():Iterator<Edge<Node,Node>>;
 };
 
-function nodeFactory(grid:Grid):NodeFactory {
+export type EdgeGenerator = (
+    grid:Grid,
+    edgeCtor:EdgeClass,
+    edgeGetter:(start:Point, end:Point, createIfNeeded:boolean)=>Edge
+    )=> (loc:Point)=>Edge[];
+
+export type EdgeClass = {
+    new(
+        _startPoint:Point,
+        _endPoint:Point,
+        direction:Direction,
+        distance:number,
+        traversalCost:number,
+    ):Edge
+}
+
+export function nodeFactory(grid:Grid, edgeGenOverride?:EdgeGenerator):NodeFactory {
     const locKeyFunc = pointToKey;
 
     const nodeKeyFunc = (loc:Point)=>locKeyFunc(loc);
@@ -142,7 +162,7 @@ function nodeFactory(grid:Grid):NodeFactory {
             public readonly _startPoint:Point,
             public readonly _endPoint:Point,
             public readonly direction:Direction,
-            public readonly distance:EdgeLength,
+            public readonly distance:EdgeLength|number,
             public readonly traversalCost:number,
         ) {
             const key = edgeKeyFunc(this._startPoint, this._endPoint);
@@ -182,15 +202,15 @@ function nodeFactory(grid:Grid):NodeFactory {
         }
     }
 
-    function getTileValue(loc:Point):number {
-        return +getTileFrom(loc,grid);
-    }
+    const edgesFor = edgeGenOverride !== undefined ?
+                        edgeGenOverride(grid,_Edge, _Edge.for) :
+                        _edgesFor;
 
     function buildNode(location:Point):Node {
         return {
           location,
           edges: edgesFor(location),
-          localCost: getTileValue(location),
+          localCost: getTileValue(grid,location),
           cheapestRouteToStartVia: {
               U: undefined,
               D: undefined,
@@ -200,13 +220,13 @@ function nodeFactory(grid:Grid):NodeFactory {
         };
     }
 
-    function edgesFor(loc:Point):Edge[] {
+    function _edgesFor(loc:Point):Edge[] {
         return (DIRECTIONS).flatMap(
             (direction):Edge[]=>{
                 const es = edgeLengths.map(distance=>({
                     distance,
                     p: addPoints(directionMap[direction].map(dim=>dim*distance) as Point, loc),
-                })).filter(({p})=>isPointOnGrid(p,grid));;
+                })).filter(({p})=>isPointOnGrid(p,grid));
 
                     const ret:_Edge[] = [];
                     let tail = es.pop();
@@ -219,7 +239,7 @@ function nodeFactory(grid:Grid):NodeFactory {
                         if(old !== undefined)
                             ret.push(old)
                         else {
-                            const traversalCost = sum(es,({p})=>getTileValue(p));
+                            const traversalCost = sum(es,({p})=>getTileValue(grid,p));
                             ret.push(new _Edge(
                                 loc,
                                 end,
@@ -252,9 +272,10 @@ function nodeFactory(grid:Grid):NodeFactory {
     };
 }
 
-export function doTraversal(grid:Grid, startLoc:Point, goalLoc:Point):Node {
+export function doTraversal(grid:Grid, startLoc:Point, goalLoc:Point, nodeFactoryOverride?:(grid:Grid)=>NodeFactory):Node {
 
-    const nodeManager = nodeFactory(grid);
+    const nodeManager = (nodeFactoryOverride ?? nodeFactory)(grid);
+
     const { getNode, getEdge } = nodeManager;
 
     const totalNodeCount = gridWidth(grid) * gridHeight(grid);
