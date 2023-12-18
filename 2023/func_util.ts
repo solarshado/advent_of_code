@@ -3,7 +3,10 @@ export const memoCacheSym = Symbol();
 
 type MemoizeReturn<T extends (...params:unknown[])=>unknown,K,V extends ReturnType<T>> = T & { [key in typeof memoCacheSym]: Map<K,V> }
 
-export function memozie<
+/** @deprecated */
+export const memozie = memoize;
+
+export function memoize<
     // deno-lint-ignore no-explicit-any
     T extends (...args:any[])=>any,
     U extends Parameters<T>,
