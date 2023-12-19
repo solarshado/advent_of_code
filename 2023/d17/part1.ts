@@ -51,7 +51,7 @@ export class PriorityQueue<T> {
     add(item:T, overrideMapper:Mapper<T,number>):void;
 
     add(item:T, mapperOrPrio?:Mapper<T,number>|number) {
-        const mapper = 
+        const mapper =
             typeof mapperOrPrio === "function" ?
             mapperOrPrio :
             this.mapper;

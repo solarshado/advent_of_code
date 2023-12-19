@@ -38,7 +38,8 @@ export function transpose<T>(grid:Grid<T>):Grid<T> {
 
 export function rotateGrid90DegCW<T>(grid:Grid<T>):Grid<T> {
     // assume square
-    if(grid.length != grid[0].length)
+    const w = gridWidth(grid), h = gridHeight(grid);
+    if(w != h)
         throw "rotate only implemented for square grids, time to fix that";
 
     return grid.map((_,y)=>column(grid,y).toReversed());
@@ -99,4 +100,25 @@ export function renderPoints<T>(grid:Grid<T>, points:Iterable<Point>, tile:strin
     setTile(p, copy, tile);
   }
   return renderGrid(copy);
+}
+
+// nickd from d17 p1
+
+export const DIRECTIONS = ["U","D","L","R"] as const;
+export type Direction = typeof DIRECTIONS[number];
+
+export const directionMap:{ [key in Direction]: Point } = {
+    U: [0,-1],
+    D: [0,+1],
+    L: [-1,0],
+    R: [+1,0],
+}
+
+export function areOppositeDirections(l:Direction, r:Direction):boolean {
+    return (
+        (l === "U" && r === "D") ||
+        (l === "D" && r === "U") ||
+        (l === "L" && r === "R") ||
+        (l === "R" && r === "L")
+    );
 }
