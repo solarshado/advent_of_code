@@ -1,5 +1,4 @@
 import { runMain, sum, yeet, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
 
 export type Part = {
     x:number,
@@ -17,6 +16,7 @@ export type Rule = {
     condition:Condition|null,
     action:Action,
 }
+
 export type Action = "A"|"R"|{jumpTo:string}
 
 export type Condition = {
@@ -45,7 +45,6 @@ export function parseInput(lines:string[]):{workflows:Map<string,Worflow>, parts
         parts.push(parsePart(l));
     }
 
-
     return {
         workflows: new Map(workflows.map(w=>[w.name,w])),
         parts
@@ -73,10 +72,7 @@ export function parseWorkflow(line:string):Worflow {
         return { action: parseAction(action), condition };
     });
 
-    return {
-        name,
-        rules,
-    }
+    return { name, rules, }
 }
 
 export function parsePart(line:string):Part {

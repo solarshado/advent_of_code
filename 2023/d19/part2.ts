@@ -1,6 +1,5 @@
 import { product, runMain, sum, yeet, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
-import { Action, Condition, Part, Worflow, parseInput } from './part1.ts';
+import { Action, Condition, Worflow, parseInput } from './part1.ts';
 
 type Range = {
     top:number,
@@ -34,11 +33,6 @@ function applyCondition(range:Range, {op,val}:Pick<Condition,"op"|"val">):{passe
     const lower = { ...range, top: val + topAdj};
 
     const [passed,failed] = op == ">" ? [upper,lower] : [lower,upper];
-
-    const pre = countValuesInRange(range);
-    const above = countValuesInRange(upper);
-    const below = countValuesInRange(lower);
-
     return {passed,failed};
 }
 
@@ -55,7 +49,6 @@ type State = "A"|"R"|{wf:string, ruleIdx:number};
 
 export function runWorkflow(wfs:Map<string,Worflow>, part:AbstractPart):AbstractPart[] {
     const getWf = (s:string)=>wfs.get(s);
-    debugger;
     
     type Part = {part:AbstractPart, state:State};
 
@@ -107,7 +100,6 @@ export function runWorkflow(wfs:Map<string,Worflow>, part:AbstractPart):Abstract
             }
             partQueue.push({part: newPart, state})
         }
-        //// ?
     }
 
     function actionToState(action:Action):State {
@@ -142,16 +134,11 @@ export async function main(lines:string[]) {
 
     const passedParts = runWorkflow(workflows,initPart);
 
-    console.log(passedParts.map(p=>Object.fromEntries(Object.entries(p).map(([k,v])=>
-        [k,{ ...v, size: countValuesInRange(v) }]
-    ))));
+    console.log(passedParts);
 
     const answer = sum(passedParts, countRealParts);
 
-    const example_goal = 167409079868000
-    console.log(example_goal)
     console.log(answer);
-    console.log("error:",example_goal-answer);
 }
 
 if(import.meta.main)
