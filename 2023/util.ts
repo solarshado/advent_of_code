@@ -26,6 +26,10 @@ export async function runMain(main:Main) {
     await main(inputLines);
 }
 
+export function yeet<T>(t:T):never {
+    throw t;
+}
+
 export function sum(nums:number[], mapper?:((v:number)=>number)):number;
 export function sum<T>(nums:T[], mapper:((v:T)=>number)):number;
 
