@@ -198,13 +198,13 @@ export function pushButton(network:ModuleNetwork, setInitState?:ModuleStateSnaps
 
     pulseQueue.push(buttonPulse);
 
-    console.log("button pushed!")
+    //console.log("button pushed!")
     
     while(pulseQueue.length > 0) {
         const curPulse = pulseQueue.shift()!;
 
-        const {src,type,dest} = curPulse;
-        console.log("pulse:",src,"-",type,">",dest);
+        //const {src,type,dest} = curPulse;
+        //console.log("pulse:",src,"-",type,">",dest);
 
         totalPulses[curPulse.type] += 1;
 
@@ -228,7 +228,7 @@ export function pushButton(network:ModuleNetwork, setInitState?:ModuleStateSnaps
 
     const finalState = extractStates(network);
 
-    console.log("network quiet after",totalPulses,"pulses, final state:",finalState);
+    //console.log("network quiet after",totalPulses,"pulses, final state:",finalState);
 
     return { totalPulses, finalState, }
 }
