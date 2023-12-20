@@ -26,7 +26,7 @@ export async function runMain(main:Main) {
     await main(inputLines);
 }
 
-export function yeet<T>(t:T):never {
+export function yeet<T>(...t:T[]):never {
     throw t;
 }
 
