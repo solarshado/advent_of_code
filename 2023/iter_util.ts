@@ -19,6 +19,33 @@ export function* genPairs<T>(list:T[]):IterableIterator<[T,T]> {
             yield [list[l],list[r]];
 }
 
+/** @deprecated */
+export function* pairWise<T>(src:T[]):IterableIterator<[T,T]> {
+    const len = src.length;
+    for(let i = 0 ; i < len - 1; ++i){
+        const a = src[i], b = src[i+1];
+        yield [a,b]
+    }
+}
+
+/** TODO test this */
+export function* pairwise<T>(src:Iterable<T>|Iterator<T>):IterableIterator<[T,T]> {
+    const iter = ("next" in src && typeof src.next === "function") ?
+                    src as Iterator<T> :
+                    (src as Iterable<T>)[Symbol.iterator]();
+
+    let prev = iter.next();
+    while(true) {
+        const next = iter.next();
+
+        yield [prev.value,next.value];
+
+        if(next.done) break;
+
+        prev = next;
+    }
+}
+
 export function count(iter:Iterable<unknown>) {
   return reduce((acc, _) => acc + 1, 0, iter);
 }

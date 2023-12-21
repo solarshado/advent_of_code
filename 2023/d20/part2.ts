@@ -1,17 +1,6 @@
-import { lcm, lcmAll, runMain, sum, } from "../util.ts";
-import { count, map, reduce } from "../iter_util.ts";
-import { ModuleNetwork, Pulse, PushButtonResult, buttonPulse, parseInput, } from './part1.ts';
+import { lcmAll, runMain, } from "../util.ts";
+import { ModuleNetwork, Pulse, buttonPulse, parseInput, } from './part1.ts';
 import * as pt1 from './part1.ts';
-import { memoCacheSym, memoize } from "../func_util.ts";
-//
-// nicked from d18p1; fix return type
-export function* pairWise<T>(src:T[]): Generator<[T,T], void, unknown>{
-    const len = src.length;
-    for(let i = 0 ; i < len - 1; ++i){
-        const a = src[i], b = src[i+1];
-        yield [a,b]
-    }
-}
 
 function traceback(network:ModuleNetwork) {
     const goal:Pulse = {
@@ -20,28 +9,14 @@ function traceback(network:ModuleNetwork) {
         type: "L"
     };
 
-    const toCheck = ["dt"]
+    const curName = goal.src
+    const cur = network.get(curName)!;
 
-    const found:Pulse[] = [];
+    const conj = cur as pt1.ConjunctionModule;
 
-//    while(toCheck.length > 0) {
-        const curName = toCheck.shift()!;
-        const cur = network.get(curName)!;
+    const inputs = Object.keys(conj.extractState())
 
-        //if(!(cur instanceof pt1.ConjunctionModule)) {
-            found.push({src:curName, dest:"*", type: "H"})
-        //}
-
-        const conj = cur as pt1.ConjunctionModule;
-
-        const inputs = Object.keys(conj.extractState())
-
-        toCheck.push(...inputs);
- //   }
-
-    return toCheck.map(src=>({src, dest:"*", type: "H" as pt1.PulseType}))
-
-    return found;
+    return inputs.map(src=>({src, dest:"*", type: "H" as pt1.PulseType}))
 }
 
 function matches(p:Pulse, pat:Partial<Pulse>) {
@@ -54,33 +29,21 @@ function matches(p:Pulse, pat:Partial<Pulse>) {
     return true;
 }
 
-export function pushButton(network:ModuleNetwork, toWatchFor:Partial<Pulse>[] ) {
-    //const totalPulses = { H:0, L:0 };
-
-//    if(setInitState)
-//        applyStates(network,setInitState)
+function pushButton(network:ModuleNetwork, toWatchFor:Partial<Pulse>[] ) {
+    const searchResults = toWatchFor.map(pattern=>({pattern, seen: false}));
 
     const pulseQueue:Pulse[] = [];
 
     pulseQueue.push(buttonPulse);
 
-    const searchResults = toWatchFor.map(pattern=>({pattern, seen: false}));
-
-    //console.log("button pushed!")
-    
     while(pulseQueue.length > 0) {
         const curPulse = pulseQueue.shift()!;
-
-        //const {src,type,dest} = curPulse;
-        //console.log("pulse:",src,"-",type,">",dest);
 
         for(const pat of searchResults) {
             if(pat.seen) continue;
             if(matches(curPulse, pat.pattern))
                pat.seen = true;
         }
-
-        //totalPulses[curPulse.type] += 1;
 
         const mod = network.get(curPulse.dest);
 
@@ -100,32 +63,13 @@ export function pushButton(network:ModuleNetwork, toWatchFor:Partial<Pulse>[] ) 
             });
     }
 
-//    const finalState = extractStates(network);
-
-    //console.log("network quiet after",totalPulses,"pulses")
-
     return { searchResults }
-
-   // return { totalPulses, /*finalState,*/ }
 }
 
-function bruteForceSearch(network:ModuleNetwork, targets:Partial<Pulse>[], iterations=10_000 ) {
+function bruteForceSearch(network:ModuleNetwork, targets:Partial<Pulse>[], iterations:number) {
+    const findings = targets.map(pattern=>({pattern, seenAt: [] as number[]}));
 
     let pushes = 0;
-
-    /*
-    network.set("rx",{
-        name: "rx",
-        outputs: [],
-        process({type}:Pulse) {
-            if(type === "L")
-                finished = true;
-            return null;
-        }
-    });
-    */
-
-    const findings = targets.map(pattern=>({pattern, seenAt: [] as number[]}));
 
     do {
         const {searchResults} = pushButton(network, targets);
@@ -173,9 +117,6 @@ export async function main(lines:string[]) {
 
     const modules = parseInput(cleanedLines);
 
-//    console.log(modules);
-//    return;
-
     const targets = traceback(modules);
 
     //console.log(traceback);
@@ -184,12 +125,10 @@ export async function main(lines:string[]) {
 
     //console.log(results);
 
-    const r2 = results.map(r=>({...r, holds: confirmPattern(r.seenAt), seenAt: undefined,
-             //                  deltas: reduce(pairWise(r.seenAt), (acc,[l,r])=> (acc.push(r-l),acc), [] as number[]),
-    }))
+    const r2 = results.map(({pattern,seenAt})=>({pattern, holds: confirmPattern(seenAt)}));
+
     console.log(r2);
 
-    //const answer = bruteForceButMemoized(modules);
     const answer = lcmAll(r2.map(r=>r.holds.interval));
 
     console.log(answer);

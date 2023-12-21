@@ -1,5 +1,5 @@
-import { runMain, sum, yeet, } from "../util.ts";
-import { count, filter, map } from "../iter_util.ts";
+import { runMain, yeet, } from "../util.ts";
+import { filter, map } from "../iter_util.ts";
 import { memoize, pipe } from "../func_util.ts";
 
 export type ModuleName = string;
@@ -13,8 +13,8 @@ export type Pulse = {
 }
 
 export type Module = {
-    name: string,
-    outputs: string[], // module names
+    name: ModuleName,
+    outputs: ModuleName[], // module names
     process(p:Pulse):PulseType|null
 }
 export type ModuleWithState<TState> = Module & {
@@ -22,17 +22,6 @@ export type ModuleWithState<TState> = Module & {
     extractState():TState,
     applyState(state:TState):void,
 }
-/*
-& ({
-    type:"%", // flip-flop
-    state: boolean, // default false
-}|{
-    type:"&", //conjunction
-    state: { [src:ModuleName]:PulseType }
-}|{
-    type:"*", // braodcast
-});
-*/
 
 export class FlipFlopModule implements ModuleWithState<boolean> {
     public state = false 
@@ -70,20 +59,15 @@ export class ConjunctionModule implements ModuleWithState<ConjunctionModule["sta
         this.state = Object.fromEntries(inputs.map(i=>[i,"L"]));
     }
     process({src,type}:Pulse) {
-        //console.log("conjMod",this.name,": received",{src,type},"while",this.state);
         this.state[src] = type;
-
-        //console.log("conjMod",this.name,"updated state to",this.state);
 
         return Object.values(this.state)
                         .every(s=>s==="H") ? "L" : "H";
     }
     extractState(): { [src: string]: PulseType } {
-        //console.log("conjMod",this.name,"saving state",this.state);
         return Object.assign({}, this.state);
     }
     applyState(state: { [src: string]: PulseType }): void {
-        //console.log("conjMod",this.name,"applying state",this.state);
         this.state = Object.assign({}, state);
     }
 }
@@ -153,13 +137,9 @@ export function parseInput(lines:string[]):ModuleNetwork {
 export function extractStates(network:ModuleNetwork) {
     return pipe(network.entries(),
                 es=> (filter(es,
-                             //([_,v])=> v instanceof FlipFlopModule || v instanceof ConjunctionModule)) as
-                             //   IterableIterator<[string,FlipFlopModule|ConjunctionModule]>,
-                             ([_,v])=> "state" in v) as IterableIterator<[string,FlipFlopModule|ConjunctionModule]>),
+                             ([_,v])=> "extractState" in v) as IterableIterator<[string,ModuleWithState<unknown>]>),
                 es=> map(es, ([k,v])=>[k,v.extractState()] as const),
                 es=> Object.fromEntries(es));
-                //es=> new Map(es));
-
 }
 
 export type ModuleStateSnapshot = ReturnType<typeof extractStates>
@@ -167,10 +147,8 @@ export type ModuleStateSnapshot = ReturnType<typeof extractStates>
 export function applyStates(network:ModuleNetwork, snapshot:ModuleStateSnapshot) {
     const states = Object.entries(snapshot);
 
-    //debugger;
-
     for(const [name,state] of states) {
-        const mod = (network.get(name) ?? yeet("failed to get module for state")) //as (FlipFlopModule|ConjunctionModule);
+        const mod = (network.get(name) ?? yeet("failed to get module for state"));
 
         if(!("applyState" in mod))
             throw "module has no 'applyState' prop:"+mod;
@@ -185,7 +163,6 @@ export function applyStates(network:ModuleNetwork, snapshot:ModuleStateSnapshot)
 export type PushButtonResult = {
     totalPulses: { [key in PulseType]: number },
     finalState: ModuleStateSnapshot,
-    //finalStates: Map<ModuleName,(FlipFlopModule|ConjunctionModule)["state"]>
 }
 
 export function pushButton(network:ModuleNetwork, setInitState?:ModuleStateSnapshot):PushButtonResult {
@@ -234,6 +211,9 @@ export function pushButton(network:ModuleNetwork, setInitState?:ModuleStateSnaps
 }
 
 export function pushButtonRepeatedly(network:ModuleNetwork, count=1000) {
+    // memoizing turns out to be useless for the full puzzle...
+    // based on part 2's results, states don't repeat until at
+    // least 200 trillion pushes... oh well
     type ParamT = Parameters<typeof pushButton>[1];
     const memo = memoize((state:ParamT)=>pushButton(network,state), (startState)=>JSON.stringify(startState));
 
@@ -261,17 +241,6 @@ export async function main(lines:string[]) {
 
     //console.log(modules);
 
-    /*
-    const pushResult = pushButton(modules)
-    const pushResult2 = pushButton(modules)
-    const pushResult3= pushButton(modules)
-
-    console.log(pushResult);
-    console.log(pushResult2);
-    console.log(pushResult3);
-    return;
- //  */
- //*
     const pushResult = pushButtonRepeatedly(modules);
 
     console.log(pushResult); 
@@ -279,7 +248,6 @@ export async function main(lines:string[]) {
     const answer = pushResult.H * pushResult.L;
 
     console.log(answer);
-    // */
 }
 
 if(import.meta.main)
