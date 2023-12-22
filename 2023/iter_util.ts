@@ -120,3 +120,36 @@ export function reduce<T,U>(first:ReduceParam<T,U>, second:Reducer<T,U>|T, third
     return acc;
 }
 
+export function some<T>(predecate:Predicate<T>, iter:Iterable<T>):boolean;
+export function some<T>(iter:Iterable<T>, predecate:Predicate<T>):boolean;
+
+export function some<T>(first:FilterParam<T>, second:FilterParam<T>):boolean {
+    const [predecate,iter] =
+        typeof first === "function" && typeof second === "object" ?
+        [first,second] :
+        typeof first === "object" && typeof second === "function" ?
+        [second,first] :
+        (function() { throw "Bad parameters!"; })();
+
+    for(const item of iter)
+        if(predecate(item))
+            return true;
+    return false;
+}
+
+export function every<T>(predecate:Predicate<T>, iter:Iterable<T>):boolean;
+export function every<T>(iter:Iterable<T>, predecate:Predicate<T>):boolean;
+
+export function every<T>(first:FilterParam<T>, second:FilterParam<T>):boolean {
+    const [predecate,iter] =
+        typeof first === "function" && typeof second === "object" ?
+        [first,second] :
+        typeof first === "object" && typeof second === "function" ?
+        [second,first] :
+        (function() { throw "Bad parameters!"; })();
+
+    for(const item of iter)
+        if(!predecate(item))
+            return false;
+    return true;
+}
