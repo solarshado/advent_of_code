@@ -1,11 +1,11 @@
 import { runMain, sum, } from "../util.ts";
-import { count, every, map } from "../iter_util.ts";
-import { Brick } from './part1.ts';
-import * as p1 from './part1.ts';
+import { every, } from "../iter_util.ts";
+import { Brick, dropBricks, groupByLowestPoint, parseInput } from './part1.ts';
+
 import { PriorityQueue } from "../d17/part1.ts";
 
 export function countWouldFallOnDisentigrate(bricks:Brick[]):number {
-    const grouped = p1.groupByLowestPoint(bricks)//.filter(z=> z!==null && z!==undefined);
+    const grouped = groupByLowestPoint(bricks)
 
     const supportedByMap = new Map<Brick,Set<Brick>>();
     const supportsMap = new Map<Brick,Set<Brick>>()
@@ -66,24 +66,18 @@ export function countWouldFallOnDisentigrate(bricks:Brick[]):number {
         // plz don't let me down, shitty prio queue
         const toCheck = new PriorityQueue<Brick>(b=>b.getLowestPoint().z, supportsMap.get(yeeten)!)
 
-        function declareFallen(b:Brick) {
-            fallen.add(b);
-
-            const supported = supportsMap.get(b)
-            if(supported)
-                supported.forEach(b=>toCheck.add(b));
-        }
-
         while(toCheck.length > 0) {
             const cur = toCheck.popFirst()!;
 
             const supporters = supportedByMap.get(cur)!;
 
             if(supporters.size <= 1 || every(supporters, s=>fallen.has(s))) {
-                // we fallin' too
-                declareFallen(cur)
-            }
+                fallen.add(cur);
 
+                const supported = supportsMap.get(cur)
+                if(supported)
+                    supported.forEach(b=>toCheck.add(b));
+            }
         }
 
         console.log("candidate done,",fallen.size-1,"fallen")
@@ -97,11 +91,11 @@ export function countWouldFallOnDisentigrate(bricks:Brick[]):number {
 export async function main(lines:string[]) {
     const cleanedLines = lines.map(l=>l.trim()).filter(l=>l!='');
 
-    const bricks = p1.parseInput(cleanedLines)
+    const bricks = parseInput(cleanedLines)
 
     console.log("loaded",bricks.length,"bricks");
 
-    const settled = p1.dropBricks(bricks);
+    const settled = dropBricks(bricks);
 
     console.log("bricks settled");
 

@@ -1,6 +1,5 @@
-import { runMain, sum, yeet, } from "../util.ts";
-import { count, every, map, range, some, toArray } from "../iter_util.ts";
-import { pipe } from "../func_util.ts";
+import { runMain, yeet, } from "../util.ts";
+import { every, map, range, some, toArray } from "../iter_util.ts";
 
 export type Tripple = [number,number,number];
 export class Point3D {
@@ -43,7 +42,7 @@ export class Point3D {
 }
 
 export class Brick {
-    public name="";
+    //public name="";
     public readonly body: readonly Point3D[];
     private readonly allPoints:Set<Point3D>;
     constructor(
@@ -111,14 +110,16 @@ export class Brick {
 }
 
 export function parseInput(lines:string[]):Brick[] {
+    /*
     const alphabet = (function* (){
         for(const cur of "ABCDEFGHIJKLMNOP".split(""))
             yield cur;
     })()
+    */
     return lines.map(l=>{
         const [head,tail] = l.split('~').map(p=>Point3D.for(p.split(",").map(Number) as Tripple));
         const b = new Brick(head,tail);
-        b.name = alphabet.next().value!;
+        //b.name = alphabet.next().value!;
         return b;
     });
 }
@@ -144,16 +145,7 @@ export function dropBricks(bricks:Brick[]):Brick[] {
 
     const settledBricks = grouped.s;
 
-    /*
-    let fallingBricks = grouped.f.sort((l,r)=>
-                                       Math.min(l.head.y, l.tail.y) -
-                                       Math.min(r.head.y, r.tail.y));
-    */
-
     const fallingBricks = groupByLowestPoint(grouped.f);
-
-    //console.log("dropBricks - settled:",settledBricks);
-    //console.log("dropBricks - falling:",fallingBricks);
 
     const fallDelta = Point3D.for(0,0,-1);
 
@@ -165,15 +157,17 @@ export function dropBricks(bricks:Brick[]):Brick[] {
         while(thisZ.length > 0) {
             const cur = thisZ.shift()!;
 
+            /// could/should filter settledBricks before this some()
             if(cur.isTouchingGround() || settledBricks.some(b=>b.isSupporting(cur))) {
                 settledBricks.unshift(cur);
                 continue;
             }
 
+            // should definitely check if a larger delta would work
             const {head,tail} = cur;
             const [newH, newT] = [head, tail].map(p=>p.add(fallDelta));
             const newBrick = new Brick(newH, newT);
-            newBrick.name = cur.name;
+            //newBrick.name = cur.name;
             thisZ.push(newBrick);
         }
 
@@ -185,12 +179,10 @@ export function dropBricks(bricks:Brick[]):Brick[] {
 }
 
 export function countSafeToDisentigrateBricks(bricks:Brick[]):number {
-    const grouped = groupByLowestPoint(bricks)//.filter(z=> z!==null && z!==undefined);
+    const grouped = groupByLowestPoint(bricks);
 
     const supportedByMap = new Map<Brick,Set<Brick>>();
     const supportsMap = new Map<Brick,Set<Brick>>()
-
-    debugger;
 
     for(const bricks of grouped) {
         if(!bricks) continue;
