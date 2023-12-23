@@ -1,6 +1,4 @@
-import { runMain, sum, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
-import {  } from "../grid_util.ts";
+import { runMain, } from "../util.ts";
 import * as gu from "../grid_util.ts";
 import * as d17p1 from "../d17/part1.ts";
 
