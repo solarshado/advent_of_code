@@ -15,7 +15,7 @@ export function* genPairs<T>(list:T[]):IterableIterator<[T,T]> {
     const len = list.length;
 
     for(let l = 0 ; l < len - 1; ++l)
-        for(let r = l ; r < len; ++r)
+        for(let r = l+1 ; r < len; ++r)
             yield [list[l],list[r]];
 }
 
