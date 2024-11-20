@@ -4,3 +4,8 @@ session.cookie
 *_input.txt
 input.txt
 example.txt
+
+bin/
+obj/
+Debug/
+Release/
