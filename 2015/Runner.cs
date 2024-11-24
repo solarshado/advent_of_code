@@ -1,8 +1,21 @@
 namespace AoC2015;
 
 using System.Reflection;
+using System.Net.Http;
 
 static class Runner {
+    const string YEAR = "2015";
+    static readonly string rootNamespace = typeof(Runner).Namespace!;
+
+    private static string GetProjectRoot() {
+        var dir = Directory.GetCurrentDirectory();
+
+        if(!Directory.EnumerateFiles(dir,"*.csproj").Any())
+            throw new FileNotFoundException(
+                    $"No csproj file found in \"{dir}\". Are you running this program from the right place?");
+
+        return dir;
+    }
 
     enum DataSource {
         Example,
@@ -58,6 +71,9 @@ static class Runner {
         else if(args is ["init", var rawDay] && rawDay.TryParseAsDayNum(out var dayToInit)) {
             InitDay(dayToInit);
         }
+        else if(args is ["getinput", var rawDay2] && rawDay2.TryParseAsDayNum(out var dayToGet)) {
+            CreateInputFileForDay(dayToGet);
+        }
         else {
             var cmdName = "Runner"; //Environment.GetCommandLineArgs()[0];
             // TODO update this text
@@ -66,21 +82,102 @@ static class Runner {
     }
 
     static void InitDay(int dayNum) {
-        // TODO
-        // create subdir
-        // copy/transform template
-        // get input.txt, either from cache or web
-        //      latter will require reading a session cookie
+        var destDir = Path.Combine(
+                GetProjectRoot(),
+                $"d{dayNum}");
+
+        if(Directory.Exists(destDir)) {
+            Console.WriteLine($"Dir for day {dayNum} already exists! Aborting init.");
+            return;
+        }
+
+        Directory.CreateDirectory(destDir);
+
+        var files = new ValueTuple<string,Func<string>>[] {
+            ("example.txt",()=>""),
+            ("Part1.cs",()=>GenSolver(dayNum,1)),
+            ("Part2.cs",()=>GenSolver(dayNum,2)),
+            ("input.txt",()=>FetchInputTextForDay(dayNum)),
+        };
+
+        foreach(var (filename, contentFunc) in files) {
+            var fullPath = Path.Combine(destDir, filename);
+            File.WriteAllText(fullPath, contentFunc());
+        }
     }
 
+    static void CreateInputFileForDay(int dayNum) {
+        var destDir = Path.Combine(
+                GetProjectRoot(),
+                $"d{dayNum}");
+
+        if(!Directory.Exists(destDir)) {
+            Console.WriteLine($"Dir for day {dayNum} doesn't exist! Try init'ing it first? Aborting.");
+            return;
+        }
+
+        var fullPath = Path.Combine(destDir, "input.txt");
+        File.WriteAllText(fullPath, FetchInputTextForDay(dayNum));
+    }
+
+    static string GenSolver(int day, int part) {
+        return $$"""
+            namespace {{rootNamespace}}.Day{{day}};
+
+            class Part{{part}} {
+
+                static void Main(string[] inputLines) {
+                    /*
+                    foreach(var line in inputLines) {
+                        var result = ();
+                        Console.WriteLine($"Result: {result}");
+                    }
+                    */
+                }
+            }
+            """;
+    }
+
+    static string FetchInputTextForDay(int day) {
+        // TODO use cache
+
+        const string sessionCookieFilename = "session.cookie";
+
+        var cookieFile = Path.Combine(GetProjectRoot(),sessionCookieFilename);
+
+        if(!File.Exists(cookieFile))
+            throw new FileNotFoundException($"No session cookie file found! Create it at \"{cookieFile}\" and try again.");
+
+        var sessionCookie = File.ReadAllText(cookieFile);
+
+        var url = $"https://adventofcode.com/{YEAR}/day/{day}/input";
+
+        var userAgent = $".NET/8 (github.com/solarshado/advent_of_code)";
+
+        var headers = new[] {
+            ("Cookie", "session="+sessionCookie),
+            ("User-Agent", userAgent),
+        };
+
+        using var client = new HttpClient();
+        using var message = new HttpRequestMessage(HttpMethod.Get, url);
+
+        foreach(var (name,value) in headers)
+            message.Headers.Add(name,value);
+
+        Console.WriteLine("fetching input...");
+        using var response = client.Send(message);
+
+        var content = response.Content.ReadAsStringAsync().Result;
+
+        return content;
+    }
 
     private const BindingFlags flagsForMain = BindingFlags.Static | BindingFlags.NonPublic;
 
     static void RunSolver(int dayNum, int partNum, DataSource dataSource) {
 
-        var namespacePrefix = typeof(Runner).Namespace;
-
-        var requestedSolverName = $"{namespacePrefix}.Day{dayNum}.Part{partNum}";
+        var requestedSolverName = $"{rootNamespace}.Day{dayNum}.Part{partNum}";
 
         var solvers = Assembly.GetExecutingAssembly().GetTypes();
 
@@ -106,7 +203,7 @@ static class Runner {
 
     static string[] LoadDataLines(int dayNum, int partNum, DataSource dataSource) {
         var pathToFile = Path.Combine(
-                Directory.GetCurrentDirectory(),
+                GetProjectRoot(),
                 $"d{dayNum}",
 #pragma warning disable 8524
                 dataSource switch {
