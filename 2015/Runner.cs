@@ -4,51 +4,79 @@ using System.Reflection;
 
 static class Runner {
 
-    private const BindingFlags flagsForMain = BindingFlags.Static | BindingFlags.NonPublic;
-
     enum DataSource {
         Example,
         Full
     }
 
     static bool TryParseAsDataSource(this string input, out DataSource output) {
-        switch(input.ToLower()[0]) {
-            case 'e': 
-                output = DataSource.Example;
-                return true;
+        (bool retVal, output) = input.ToLower()[0] switch {
+            'e' => (true, DataSource.Example),
+            'f' => (true, DataSource.Full),
+            _ => (false, (DataSource)(-1))
+        };
 
-            case 'f':
-                output = DataSource.Full;
-                return true;
+        return retVal;
+    }
 
-            default:
-                output = (DataSource)(-1);
-                return false;
-        }
+    static bool TryParseRunArgs(this string[] args, out int day, out int part, out DataSource dataSource) {
+        day = part = 0;
+        dataSource = (DataSource)(-1);
+
+        var rawVals =
+            args is ["run", _, _, _] ? args.Slice(1, 3) :
+            args is [_, _, _] ? args.Slice(0 ,3) :
+            (ArraySegment<string>?) null;
+
+        if(rawVals is null)
+            return false;
+
+        return
+            rawVals is [var rawDay, var rawPart, var dataSrcRaw] &&
+                        rawDay.TryParseAsDayNum(out day) &&
+
+                        int.TryParse(rawPart, out part) &&
+                        part is ( 1 or 2 ) &&
+
+                        dataSrcRaw.TryParseAsDataSource(out dataSource);
+    }
+
+    static bool TryParseAsDayNum(this string str, out int dayNum) {
+       return
+           int.TryParse(str, out dayNum) &&
+           dayNum is ( > 0 and < 26 );
+    }
+
+    static ArraySegment<T> Slice<T>(this T[] ary, int start, int len) {
+        return new ArraySegment<T>(ary, start, len);
     }
 
     static void Main(string[] args) {
-
-        // TODO refactor to handle subcommands:
-        // run [day] [part] [data]
-        //     runs the specified solver
-        //     default to this if "run" is omitted
-        // init [day]
-        //     setups up the specified day: copy template source files and fetch input data
-
-        if( args is not [var day, var part, var dataSrcRaw] ||
-
-            !int.TryParse(day, out var dayNum) ||
-            dayNum is ( < 1 or > 25 ) ||
-
-            !int.TryParse(part, out var partNum) ||
-            partNum is not ( 1 or 2 ) ||
-
-            !dataSrcRaw.TryParseAsDataSource(out var dataSource)
-          ) {
-            Console.WriteLine("Usage: Runner [dayNum] [partNum] {e|f}");
-            return;
+        if(args.TryParseRunArgs(out var day, out var part, out var dataSource)) {
+            RunSolver(day,part,dataSource);
         }
+        else if(args is ["init", var rawDay] && rawDay.TryParseAsDayNum(out var dayToInit)) {
+            InitDay(dayToInit);
+        }
+        else {
+            var cmdName = "Runner"; //Environment.GetCommandLineArgs()[0];
+            // TODO update this text
+            Console.WriteLine($"Usage: {cmdName} [dayNum] [partNum] {{e|f}}");
+        }
+    }
+
+    static void InitDay(int dayNum) {
+        // TODO
+        // create subdir
+        // copy/transform template
+        // get input.txt, either from cache or web
+        //      latter will require reading a session cookie
+    }
+
+
+    private const BindingFlags flagsForMain = BindingFlags.Static | BindingFlags.NonPublic;
+
+    static void RunSolver(int dayNum, int partNum, DataSource dataSource) {
 
         var namespacePrefix = typeof(Runner).Namespace;
 
@@ -57,7 +85,7 @@ static class Runner {
         var solvers = Assembly.GetExecutingAssembly().GetTypes();
 
         var requestedSolver =
-            solvers.SingleOrDefault(s=> s.FullName.Equals(requestedSolverName));
+            solvers.SingleOrDefault(s=> requestedSolverName.Equals(s.FullName));
 
         if(requestedSolver is null) {
             Console.WriteLine("Solver {0} not found!", requestedSolverName);
@@ -80,10 +108,12 @@ static class Runner {
         var pathToFile = Path.Combine(
                 Directory.GetCurrentDirectory(),
                 $"d{dayNum}",
+#pragma warning disable 8524
                 dataSource switch {
                     DataSource.Example => "example.txt",
                     DataSource.Full => "input.txt",
                 });
+#pragma warning restore 8524
         return File.ReadAllLines(pathToFile);
     }
 }
