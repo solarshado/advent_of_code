@@ -1,5 +1,6 @@
 import { runMain, sum, } from "../util.ts";
 import { map, toArray } from "../iter_util.ts";
+import * as iu from "../iter_util.ts";
 import { HexColor, Instruction, yeet } from './part1.ts';
 import * as part1 from './part1.ts';
 import { Direction, Point, } from "../grid_util.ts";
@@ -113,6 +114,15 @@ function getEdges(g:GridCell):{ [D in Direction]: Line} {
         D: [br,bl],
         L: [bl,tl]
     };
+}
+
+/** @returns the same line, possibly reversed to ensure its `start` is closer to `0,0` */
+function normalizeEdge(line:Line):Line {
+    const [start,end] = line;
+    const [sx,sy] = start;
+    const [ex,ey] = end;
+
+    return (sx < ex) || (sy < ey) ? line : [end,start];
 }
 
 function isLineSegmentOf(smol:Line, lorge:Line):boolean {
@@ -284,7 +294,58 @@ function processCells(cells:GridCell[][]) {
     if(insideQueue.length === 0)
         throw "failed to find inside cell!"
 
-    let innerSpaceTotal = 0
+    //let innerSpaceTotal = 0
+    const innerSpace = {
+        add(cell:GridCell) {
+            const {
+                topLeft: [left, top],
+                bottomRight: [right, bottom],
+                closedSides,
+            } = cell;
+            const edges = getEdges(cell);
+
+            const cellKey = `[[${left},${top}],[${right},${bottom}]]`;
+
+            if( !this.rects.has(cellKey) ) {
+                const area = (bottom + -top + -1)*(right + -left + -1);
+                this.rects.set(cellKey,Math.max(0,area));
+            }
+
+            for(const dir of gu.DIRECTIONS) {
+                //if(closedSides[dir])
+                //    continue;
+                
+                const edge = normalizeEdge(edges[dir]);
+
+                const edgeKey = JSON.stringify(edge); //TODO?
+
+                if( this.edges.has(edgeKey) )
+                    continue;
+
+                const [[esx,esy],[eex,eey]] = edge;
+                const edgeLen = 
+                    (esx === eex) ? 
+                    (eey + -esy + -1) :
+                    (eex + -esx + -1);
+
+                this.edges.set(edgeKey, Math.max(0,edgeLen));
+
+                for(const [x,y] of edge)
+                    this.corners.add(`[${x},${y}]`)
+            }
+        },
+
+        get total() {
+            return iu.reduce(
+                iu.concat(this.rects.values(), this.edges.values()),
+                (l,r)=>l+r,
+                this.corners.size);
+        },
+
+        rects: new Map<string,number>(),
+        edges: new Map<string,number>(),
+        corners: new Set<string>(),
+    } as const;
 
     let inSteps = 0;
     while(insideQueue.length > 0) {
@@ -306,12 +367,18 @@ function processCells(cells:GridCell[][]) {
         seenCells.add(cur)
 
         // TODO not this
-        innerSpaceTotal += getCellInternalArea(cur);
+        //innerSpaceTotal += getCellInternalArea(cur);
         // well, start with that, but then subtract the length of open edges leading to unvisited neighbors
         //      (that is, to avoid dounble-counting the edge, only count it the second time we see it)
         //      ? or would the reverse be better? subtracting edges shared with seen neighbors?
         //
         // also, figure out how to handle corners, which could be shared with multiple neighbors
+
+        // fuck all that
+        // sum internal area,
+        // track edges and corners in sets, add them at the end
+
+        innerSpace.add(cur);
 
         for(const dir of openSides) {
             const neigh = neighbors[dir];
@@ -324,6 +391,7 @@ function processCells(cells:GridCell[][]) {
         }
     }
 
+    /*
     burp(innerSpaceTotal, "innerSpaceTotal (old)")
     const inLagoon = cells.flat().filter(c=> c.isInLagoon);
     burp(inLagoon.length, "count in lagoon")
@@ -332,8 +400,12 @@ function processCells(cells:GridCell[][]) {
     burp(
         inLagoon.reduce((a,{bottomRight:[right,bottom],topLeft:[left,top]})=>a+(Math.abs(top-bottom)*2+Math.abs(left-right)*2),0)
     ,"total perimiter of inner cells: ");
+    */
+   burp(innerSpace, "innerSpace obj")
+   burp(innerSpace.total, "innerSpace obj")
 
-    return innerSpaceTotal;
+   //return innerSpaceTotal;
+   return innerSpace.total;
 }
 
 function renderGrid(grid:GridCell[][]):string {
@@ -393,7 +465,7 @@ export async function main(inputLines:string[]) {
     const instructions = cleanedLines.map(parseInstruction);
     //const instructions = cleanedLines.map(part1.parseInstruction);
 
-    console.log("instructions:",instructions);
+    //console.log("instructions:",instructions);
     //console.log("instructionCount:",instructions.length);
 
     const lines = toArray(drawLines(instructions));
@@ -415,7 +487,7 @@ export async function main(inputLines:string[]) {
 
     const answer = processCells(gridCells);
 
-    console.log(renderGrid(gridCells));
+    //console.log(renderGrid(gridCells));
 
     console.log(answer);
 }
