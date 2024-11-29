@@ -13,6 +13,10 @@ export type Instruction = {
 export type Tile = "."|"#";
 export type Grid = AbstractGrid<Tile>;
 
+export function yeet<T>(t:T):never {
+    throw t;
+}
+
 export function* pointsBetween(start:Point, end:Point):IterableIterator<Point> {
     const [sx,sy] = start;
     const [ex,ey] = end;
@@ -20,7 +24,7 @@ export function* pointsBetween(start:Point, end:Point):IterableIterator<Point> {
     const delta = directionMap[
         (sy === ey) ? (sx > ex ? "L" : "R") :
         (sx === ex) ? (sy > ey ? "U" : "D") :
-        ((e:string):never=>{throw e;})("only axis-aligned point pairs supported!")
+        yeet("only axis-aligned point pairs supported!")
     ];
 
     let cursor = start;
@@ -33,11 +37,14 @@ export function* pointsBetween(start:Point, end:Point):IterableIterator<Point> {
 }
 
 // nicked from d9p1; number->T
-export function* pairWise<T>(src:T[]){
+/** @deprecated */
+export const pairWise = pairwise;
+
+export function* pairwise<T>(src:T[]):IterableIterator<[T, T]> {
     const len = src.length;
     for(let i = 0 ; i < len - 1; ++i){
         const a = src[i], b = src[i+1];
-        yield [a,b]
+        yield [a,b] as [T,T];
     }
 }
 
@@ -143,46 +150,6 @@ export function digInstructions(instructions:Instruction[]):Grid {
     return grid;
 }
 
-export function _digOutInterior(grid:Grid):Grid {
-    let inside:Point|undefined = undefined;
-    //let last = "." as Tile;
-
-    search:
-    for(const [y,line] of Object.entries(grid)) {
-        let last = "." as Tile;
-        for(const [x,cell] of Object.entries(line)) {
-           if(last === "#" && cell === ".") {
-               inside = [+x,+y];
-               break search;
-           }
-           last = cell;
-        }
-    }
-    if(inside === undefined)
-        throw "failed to find lagoon interior!"
-    console.log("digOutInterior: inside:",inside);
-
-    // flood-fill from `inside`
-    const ret = grid.map(l=>[...l]);
-
-    const toVisit = [inside];
-
-    do {
-        const cur = toVisit.shift()!;
-
-        const neighbors = getNeighborhood(ret,cur);
-
-        const toDig = neighbors.filter(p=>getTileFrom(p,ret) != "#");
-
-        for(const loc of toDig)
-            setTile(loc,ret,"#")
-
-        toVisit.push(...toDig);
-    } while(toVisit.length > 0);
-
-    return ret;
-}
-
 export function digOutInterior(grid:Grid):Grid {
     const ret = grid.map(l=>[...l]);
 
@@ -226,7 +193,7 @@ export function digOutInterior(grid:Grid):Grid {
     return ret;
 }
 
-function wrapToRender(json:string) {
+export function wrapToRender(json:string) {
     return `(function(str){
         const p = document.createElement("pre");
         p.innerText = str;
