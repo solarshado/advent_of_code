@@ -14,6 +14,14 @@ export function yeet<T>(...t:T[]):never {
     throw t;
 }
 
+export function sortedNumeric(src:number[], descending=false) {
+    return src.toSorted(
+        descending ?
+            (a,b)=>b-a :
+            (a,b)=>a-b
+    );
+}
+
 export function sum(nums:number[], mapper?:((v:number)=>number)):number;
 export function sum<T>(nums:T[], mapper:((v:T)=>number)):number;
 

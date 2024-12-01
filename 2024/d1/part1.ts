@@ -1,36 +1,29 @@
-import { runMain, sum, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
-
-export type Foo = {
-    TODO:unknown,
-};
+import { runMain, sortedNumeric, sum, } from "../util.ts";
 
 export function splitLists(inputLines:string[]) {
-    const l1 = [], l2 = [];
+    const leftList = [], rightList = [];
 
     for(const line of inputLines) {
         const [_, v1 ,v2] = Array.from(/(\d+)\s+(\d+)/.exec(line)!);
 
-        l1.push(Number(v1));
-        l2.push(Number(v2));
+        leftList.push(+v1);
+        rightList.push(+v2);
     }
 
-    return [l1,l2] as const;
+    return {leftList,rightList} as const;
 }
 
 export async function main(lines:string[]) {
     const cleanedLines = lines.map(l=>l.trim()).filter(l=>l!='');
 
-    const [leftList, rightList] = splitLists(cleanedLines);
+    let {leftList, rightList} = splitLists(cleanedLines);
 
-    leftList.sort((a,b)=>a-b);
-    rightList.sort((a,b)=>a-b);
+    leftList = sortedNumeric(leftList);
+    rightList = sortedNumeric(rightList);
 
-    const pairs = leftList.map((val,i)=>[val,rightList[i]] as const);
-
-    console.log(pairs);
-
-    const answer = pairs.reduce((acc,[l,r])=>acc+ Math.abs(l-r) ,0)
+    const answer = sum(
+        leftList.map((val,i)=>[val,rightList[i]] as const),
+        ([l,r])=>Math.abs(l-r));
 
     console.log(answer);
 }
