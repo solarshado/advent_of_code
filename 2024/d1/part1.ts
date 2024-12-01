@@ -5,7 +5,7 @@ export type Foo = {
     TODO:unknown,
 };
 
-function splitLists(inputLines:string[]) {
+export function splitLists(inputLines:string[]) {
     const l1 = [], l2 = [];
 
     for(const line of inputLines) {
