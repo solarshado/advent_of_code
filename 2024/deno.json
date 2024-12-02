@@ -15,6 +15,8 @@
   },
   "tasks": {
       "init": "deno run --allow-read=. --allow-write=\"$INIT_CWD\" --allow-env --allow-net=deno.land,adventofcode.com deno_task.ts init"
+      ,"skel": "deno run --allow-read=. --allow-write=\"$INIT_CWD\" --allow-env --allow-net=deno.land,adventofcode.com deno_task.ts skel"
+      ,"fetch": "deno run --allow-read=. --allow-write=\"$INIT_CWD\" --allow-env --allow-net=deno.land,adventofcode.com deno_task.ts fetch"
       ,"p1e": "deno run --allow-read=. --allow-env --allow-net=deno.land deno_task.ts p1e"
       ,"p1e:d": "deno run --inspect-brk --allow-read=. --allow-env --allow-net=deno.land deno_task.ts p1e"
       ,"p1f": "deno run --allow-read=. --allow-env --allow-net=deno.land deno_task.ts p1f"

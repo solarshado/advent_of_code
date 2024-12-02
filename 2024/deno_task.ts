@@ -4,6 +4,8 @@ const inputFileName = "input.txt";
 
 const tasks = {
     "init": init,
+    "fetch": ()=>fetchInputFile(initishPreamble()),
+    "skel": ()=>skel(initishPreamble()),
     "run": ([i,c,f])=>feedFileToFunction(i,c,f),
     "p1e": ()=> feedFileToFunction("example.txt","part1.ts"),
     "p1f": ()=> feedFileToFunction(inputFileName,"part1.ts"),
@@ -11,9 +13,13 @@ const tasks = {
     "p2f": ()=> feedFileToFunction(inputFileName,"part2.ts"),
 } as Record<string,(args:string[])=>void>;
 
-export async function init(_args:string[]) {
+function initishPreamble() {
     const init_cwd = chdirToInitCwd();
 
+    return {init_cwd};
+}
+
+async function skel({init_cwd}:ReturnType<typeof initishPreamble>) {
     const skelPath = join(init_cwd, "..", "skel")
 
     for await (const {name, isFile} of Deno.readDir(skelPath)) {
@@ -22,17 +28,17 @@ export async function init(_args:string[]) {
         const srcPath = join(skelPath,name);
         const destPath = join(init_cwd,name);
 
-        console.log("copying...", srcPath," > ", destPath);
+        //console.log("copying...", srcPath," > ", destPath);
+        console.log("copying...", name);
 
         await Deno.copyFile(srcPath,destPath);
     }
 
-    const day = basename(init_cwd).replace("d","");
-    const year = basename(dirname(init_cwd));
-
     // create empty example.txt
     await Deno.writeTextFile("example.txt","");
+}
 
+async function fetchInputFile({init_cwd}:ReturnType<typeof initishPreamble>) {
     // fetch input.txt
     const inputExists = await (async function exists(file) {
         try {
@@ -46,22 +52,42 @@ export async function init(_args:string[]) {
         }
     })(inputFileName);
 
-    if(!inputExists) {
-        console.log("fetching input...");
-        const inputUrl = `https://adventofcode.com/${year}/day/${day}/input`;
+    if(inputExists) {
+        console.log("input file exists, skipping fetch");
+        return;
+    }
+
+    const day = basename(init_cwd).replace("d","");
+    const year = basename(dirname(init_cwd));
+
+    // TODO check cache
+    console.log("fetching input...");
+    const inputUrl = `https://adventofcode.com/${year}/day/${day}/input`;
         const sesionCookie = await Deno.readTextFile(join("..","session.cookie"));
 
-        const userAgent = `Deno/${Deno.version.deno} (github.com/solarshado/advent_of_code)`
+    const userAgent = `Deno/${Deno.version.deno} (github.com/solarshado/advent_of_code)`
 
-        const response = await fetch(inputUrl, {headers: {
-            "Cookie":"session="+sesionCookie,
-            "User-Agent": userAgent,
-        }});
+    const response = await fetch(inputUrl, {headers: {
+        "Cookie":"session="+sesionCookie,
+        "User-Agent": userAgent,
+    }});
 
-        const data = await response.text();
-
-        await Deno.writeTextFile(inputFileName,data);
+    if(response.status === 404) {
+        console.log("input returned HTTP 404! are you sure that puzzle is unlocked?");
+        return;
     }
+
+    const data = await response.text();
+
+    //TODO populate cache
+
+    await Deno.writeTextFile(inputFileName,data);
+}
+
+export async function init(_args:string[]) {
+    const pream = initishPreamble();
+    await skel(pream);
+    await fetchInputFile(pream);
 }
 
 function chdirToInitCwd() {
