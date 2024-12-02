@@ -1,8 +1,7 @@
 import { runMain, sum, } from "../util.ts";
-import { count, map, pairwise, reduce,} from "../iter_util.ts";
-import { pipe } from "../func_util.ts";
+import { map, pairwise, } from "../iter_util.ts";
 
-function parseReport(report:string) {
+export function parseReport(report:string) {
     return report.split(' ').map(Number);
 }
 

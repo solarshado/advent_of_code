@@ -1,5 +1,5 @@
 import { runMain, sum, } from "../util.ts";
-import { count, map, pairwise } from "../iter_util.ts";
+import { map, pairwise } from "../iter_util.ts";
 import { parseReport } from './part1.ts';
 
 function isReportSafe(report:number[], canRecurse=false):boolean {
@@ -9,6 +9,8 @@ function isReportSafe(report:number[], canRecurse=false):boolean {
 
     const sign = Math.sign(deltas[0]);
 
+    // dear god this is gross... works just fine though ¯\_(ツ)_/¯
+    // on second thought, it's beautiful... lmao
     return deltas.every(d=> Math.sign(d) === sign && (d=Math.abs(d), d > 0 && d < 4))
         || (canRecurse && report.map(
             (_,i)=>report.filter((__,j)=>j!==i)
