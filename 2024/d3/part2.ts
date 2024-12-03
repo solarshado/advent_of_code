@@ -1,5 +1,4 @@
 import { runMain, sum, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
 import { Mul } from './part1.ts';
 
 function findMuls(input:string):Mul[] {
@@ -14,35 +13,19 @@ function findMuls(input:string):Mul[] {
         if(!match)
             return retVal;
 
-        //console.log(match);
-
         const [_,l,r,toggle,not] = Array.from(match);
 
-        //console.log(!!toggle, !not);
-
-        // it's something stupid isn't it?
-        // but *what*...
-        // PRESERVE STATE ACCROSS LINES!
-
-        let log = "got '"+_+"', enabled = "+ enabled+"; ";
-
-        if(toggle !== undefined) {
-            const newEnabled = not !== "n't";
-            log += `newEnabled = ${newEnabled}`;
-            enabled =  newEnabled;
-        }
-        else if(enabled) {
-            log += `appending Mul(${[l,r]}`;
+        if(toggle !== undefined)
+            enabled = not !== "n't";
+        else if(enabled)
             retVal.push([l,r].map(Number) as [number,number]);
-        }
-
-        console.log(log);
     }
 }
 
 export async function main(lines:string[]) {
     const cleanedLines = lines.map(l=>l.trim()).filter(l=>l!='');
 
+    // preserve do/n't state accross lines!
     const muls = findMuls(cleanedLines.join());
 
     console.log(muls);

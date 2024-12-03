@@ -1,7 +1,6 @@
 import { runMain, sum, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
 
-type Mul = [fir:number,sec:number];
+export type Mul = [fir:number,sec:number];
 
 function findMuls(input:string):Mul[] {
     const mulRegex = /mul\((\d+),(\d+)\)/g;
