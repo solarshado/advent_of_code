@@ -1,5 +1,4 @@
-import { runMain, sum, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
+import { runMain, } from "../util.ts";
 import * as gu from "../grid_util.ts";
 import { Grid } from './part1.ts';
 
@@ -16,32 +15,19 @@ function countXMASes(grid:Grid) {
         return acc;
     }, [] as [gu.Point,gu.Point,gu.Point][]);
 
-    const tails = ms.filter(([a,m1,m2])=>{
-        const delta1 = gu.subtractPoints(a,m1);
-        const delta2 = gu.subtractPoints(a,m2);
+    const tails = ms.filter(([a,m1,m2])=>(
+        [(gu.addPoints(a, gu.subtractPoints(a, m1))),
+            (gu.addPoints(a, gu.subtractPoints(a, m2)))]
+            .every(maybeS=>gu.isPointOnGrid(maybeS,grid) && gu.getTileFrom(maybeS,grid) === "S")
+    ));
 
-        //d = a - m;
-        //-m = d - a;
-        //m = a - d;
-        //s = a + d;
-
-        const maybeS1 = gu.addPoints(a,delta1);
-        const maybeS2 = gu.addPoints(a,delta2);
-
-        return [maybeS1, maybeS2].every(maybeS=>gu.isPointOnGrid(maybeS,grid) && gu.getTileFrom(maybeS,grid) === "S");
-    });
-
-    const ret = new Set(tails.map(([[ax,ay],_])=>gu.getPointMultiton(ax,ay)));
-
-    return ret.size; //not "sam"s, but full crosses 
+    return tails.length;
 }
 
 export async function main(lines:string[]) {
     const cleanedLines = lines.map(l=>l.trim()).filter(l=>l!='');
 
     const grid = gu.parseGrid<string>(cleanedLines);
-
-    //console.log(grid);
 
     const answer = countXMASes(grid);
 
