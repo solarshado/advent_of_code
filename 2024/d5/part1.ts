@@ -2,6 +2,7 @@ import { runMain, sum, } from "../util.ts";
 import { count, map } from "../iter_util.ts";
 
 export type OrderRule = [before:number,after:number];
+export type OrderRuleMap = Map<number,Set<number>>;
 export type UpdatePageList = number[];
 
 function parseRule(raw:string) {
@@ -12,7 +13,7 @@ function parsePageList(raw:string) {
     return raw.split(",").map(Number) as UpdatePageList;
 }
 
-function parseInput(lines:string[]):{rules:OrderRule[], updates:UpdatePageList[]} {
+export function parseInput(lines:string[]):{rules:OrderRuleMap, updates:UpdatePageList[]} {
    const rules = [], updates = [];
 
    for(const line of lines) {
@@ -22,10 +23,6 @@ function parseInput(lines:string[]):{rules:OrderRule[], updates:UpdatePageList[]
            updates.push(parsePageList(line));
    }
 
-    return {rules, updates};
-}
-
-function checkUpdate(update:UpdatePageList, rules:OrderRule[]):boolean {
     const rulesMap = rules.reduce((m,[key,val])=>{
         if(m.has(key))
             m.get(key)!.add(val);
@@ -35,10 +32,15 @@ function checkUpdate(update:UpdatePageList, rules:OrderRule[]):boolean {
         }
         return m;
     } ,new Map<number,Set<number>>());
+
+    return {rules: rulesMap, updates};
+}
+
+export function checkUpdate(update:UpdatePageList, rules:OrderRuleMap):boolean {
     const seen = new Set<number>();
 
     for(const page of update) {
-        if(rulesMap.has(page) && rulesMap.get(page)!.intersection(seen).size !== 0)
+        if(rules.has(page) && rules.get(page)!.intersection(seen).size !== 0)
            return false;
 
        seen.add(page);
