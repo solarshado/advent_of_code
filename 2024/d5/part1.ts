@@ -1,5 +1,4 @@
 import { runMain, sum, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
 
 export type OrderRule = [before:number,after:number];
 export type OrderRuleMap = Map<number,Set<number>>;
@@ -31,7 +30,7 @@ export function parseInput(lines:string[]):{rules:OrderRuleMap, updates:UpdatePa
             m.set(key,s);
         }
         return m;
-    } ,new Map<number,Set<number>>());
+    }, new Map<number,Set<number>>());
 
     return {rules: rulesMap, updates};
 }
@@ -50,15 +49,13 @@ export function checkUpdate(update:UpdatePageList, rules:OrderRuleMap):boolean {
 }
 
 export async function main(lines:string[]) {
-    const cleanedLines = lines.map(l=>l.trim())//.filter(l=>l!='');
-
     const values = parseInput(lines);
 
-    console.log(values);
+    //console.log(values);
 
     const validUpdates = values.updates.filter(u=>checkUpdate(u,values.rules));
 
-    console.log(validUpdates);
+    //console.log(validUpdates);
 
     const middles = validUpdates.map(u=>u[Math.floor(u.length/2)]);
 

@@ -1,29 +1,24 @@
 import { runMain, sum, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
 import { parseInput, checkUpdate, UpdatePageList, OrderRuleMap, } from './part1.ts';
 
 function fixUpdate(update:UpdatePageList, rules:OrderRuleMap):UpdatePageList {
     return update.toSorted((l,r)=>
-                           !rules.has(l) ? 0 : 
+                           !rules.has(l) ? 0 :
                                rules.get(l)!.has(r) ? -1 :
                                1
                           );
 }
 
 export async function main(lines:string[]) {
-    const cleanedLines = lines.map(l=>l.trim())//.filter(l=>l!='');
-
     const values = parseInput(lines);
-
-    //console.log(values);
 
     const invalidUpdates = values.updates.filter(u=>!checkUpdate(u,values.rules));
 
-    console.log(invalidUpdates);
+    //console.log(invalidUpdates);
 
     const fixedUpdates = invalidUpdates.map(u=>fixUpdate(u,values.rules));
 
-    console.log(fixedUpdates);
+    //console.log(fixedUpdates);
 
     const middles = fixedUpdates.map(u=>u[Math.floor(u.length/2)]);
 
