@@ -30,6 +30,10 @@ export function addPoints([lx,ly]:Point,[rx,ry]:Point):Point {
     return [lx+rx,ly+ry];
 }
 
+export function subtractPoints([lx,ly]:Point,[rx,ry]:Point):Point {
+    return [lx-rx,ly-ry];
+}
+
 export function manhattanDistance([lx,ly]:Point, [rx,ry]:Point):number {
     const dist = Math.abs(lx-rx) + Math.abs(ly-ry);
     return dist;
