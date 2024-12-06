@@ -1,5 +1,4 @@
-import { runMain, sum, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
+import { runMain, } from "../util.ts";
 import * as gu from "../grid_util.ts";
 
 export type Tile = "." | "#" | "^";
@@ -20,7 +19,7 @@ export function turnRight(d:gu.Direction):gu.Direction {
     }
 }
 
-function countSteps(grid:Grid, start:gu.Point) {
+export function countSteps(grid:Grid, start:gu.Point) {
     let direction = "U" as gu.Direction;
 
     let curPos = start;
@@ -30,10 +29,8 @@ function countSteps(grid:Grid, start:gu.Point) {
     while(true) {
         let ahead = gu.addPoints(curPos,gu.directionMap[direction]);
 
-        if(!gu.isPointOnGrid(ahead, grid)){
-            //console.log(seen)
+        if(!gu.isPointOnGrid(ahead, grid))
             return seen;
-        }
         
         while(gu.getTileFrom(ahead,grid) === "#") {
             direction = turnRight(direction);

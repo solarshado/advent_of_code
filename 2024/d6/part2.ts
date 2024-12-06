@@ -1,6 +1,6 @@
-import { runMain, sum, } from "../util.ts";
+import { runMain, } from "../util.ts";
 import * as gu from "../grid_util.ts";
-import { Grid, Tile, turnRight } from './part1.ts';
+import { Grid, Tile, turnRight, countSteps } from './part1.ts';
 
 function countPossibleLoops(grid:Grid, start:gu.Point) {
 
@@ -9,30 +9,30 @@ function countPossibleLoops(grid:Grid, start:gu.Point) {
 
         let curPos = start;
 
+        type Step = {curPos:gu.Point, direction:gu.Direction};
+
         const path = {
             _set: new Set<string>(),
-            _keyFunc: ({curPos:[x,y],direction}:{curPos:gu.Point, direction:gu.Direction})=>
+            _keyFunc: ({curPos:[x,y],direction}:Step)=>
             ""+x+","+y+direction,
 
-            add(obj:{curPos:gu.Point, direction:gu.Direction}) {
-                this._set.add(this._keyFunc(obj))
+            add(step:Step) {
+                this._set.add(this._keyFunc(step))
             },
-            has(obj:{curPos:gu.Point, direction:gu.Direction}) {
-                return this._set.has(this._keyFunc(obj));
+            has(step:Step) {
+                return this._set.has(this._keyFunc(step));
             },
         }
-        const turns = [];
         path.add({curPos, direction});
 
         while(true) {
             let ahead = gu.addPoints(curPos,gu.directionMap[direction]);
 
-            if(!gu.isPointOnGrid(ahead, grid)){
+            if(!gu.isPointOnGrid(ahead, grid))
                 return false;
-            }
+
 
             while(gu.getTileFrom(ahead,grid) === "#" || gu.pointsEqual(ahead, extraObstacle)) {
-                turns.push({curPos, from:direction});
                 direction = turnRight(direction);
                 ahead = gu.addPoints(curPos,gu.directionMap[direction]);
             }
@@ -46,10 +46,12 @@ function countPossibleLoops(grid:Grid, start:gu.Point) {
         }
     }
 
-    const possibleObstacles = gu.findAll(grid,".");
+    // obvious-in-hindsight optimization mentioned on reddit
+    //const possibleObstacles = gu.findAll(grid,".");
+    const possibleObstacles = [...countSteps(grid,start)];
 
-    return possibleObstacles.reduce((acc,cur)=>
-                                    doesLoop(cur) ? acc + 1 : acc
+    return possibleObstacles.reduce(
+        (acc,cur)=> doesLoop(cur) ? acc + 1 : acc
     ,0);
 }
 
