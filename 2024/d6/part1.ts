@@ -5,7 +5,7 @@ import * as gu from "../grid_util.ts";
 export type Tile = "." | "#" | "^";
 export type Grid = gu.Grid<Tile>;
 
-function turnRight(d:gu.Direction):gu.Direction {
+export function turnRight(d:gu.Direction):gu.Direction {
     switch(d) {
         case "D":
             return "L";
