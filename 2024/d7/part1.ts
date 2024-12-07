@@ -1,5 +1,7 @@
 import { runMain, sum, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
+import { Reducer } from "../func_util.ts";
+
+export type Combiner = Reducer<number,number>;
 
 export type TestEquation = {
     inputs:number[];
@@ -15,44 +17,22 @@ export function parseEquation(raw:string):TestEquation {
     return {goal, inputs};
 }
 
-function isSolvable({goal,inputs}:TestEquation) {
-    const ops = {
-        "+": (l:number,r:number)=>l+r,
-        "*": (l:number,r:number)=>l*r,
-    } as const;
+export const DEFAULT_COMBINERS:Combiner[] = [
+    (l,r)=>l+r,
+    (l,r)=>l*r,
+] as const;
 
-    type Op = keyof typeof ops;
-
-    //const opLists:Op[][] = [];
-
+export function isSolvable({goal,inputs}:TestEquation, combiners:Combiner[]=DEFAULT_COMBINERS) {
     inputs = [...inputs];
 
     let answers = [inputs.shift()!];
     
-    for(const input of inputs) {
-        answers = answers.flatMap(a=>[
-            a+input,
-            a*input
-        ]);
-    }
-
-    //console.log({goal,inputs},answers);
+    // this *could* scale very poorly
+    // but luck is with me: not too poorly for this use case
+    for(const input of inputs)
+        answers = answers.flatMap(a=> combiners.map(c=>c(a,input)));
 
     return answers.some(a=>a===goal);
-
-    //const chains:{ops:(keyof typeof ops)[], total:number}[] = [];
-    //
-    //chains.push(
-    //    ...Object.keys(ops).map(o=>({ops:[o as keyof typeof ops],total:inputs[0]}))
-    //);
-
-    // is this actually a good idea?
-    // stepwise parallel construction, that is
-    // does is matter?
-    // O(n) either way, right?
-    // alternative.... backtracking? feels eww
-
-
 }
 
 export async function main(lines:string[]) {
@@ -60,13 +40,9 @@ export async function main(lines:string[]) {
 
     const equations = cleanedLines.map(parseEquation);
 
-    console.log(equations);
+    //console.log(equations);
 
-    //const tested = equations.map(e=>({e, s: isSolvable(e)}));
-
-    //console.log(tested);
-
-    const answer = sum(equations.filter(isSolvable), e=>e.goal);
+    const answer = sum(equations.filter(e=>isSolvable(e)), e=>e.goal);
 
     console.log(answer);
 }
