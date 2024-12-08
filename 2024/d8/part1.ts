@@ -4,7 +4,6 @@ import * as gu from "../grid_util.ts";
 import { genPairs } from "../iter_util.ts";
 
 export type Transmitter = string & {length: 1};
-
 export type Grid = gu.Grid<Transmitter>;
 
 export function findTransmitters(grid:Grid):Map<Transmitter,Set<gu.Point>> {
@@ -29,16 +28,11 @@ export function findTransmitters(grid:Grid):Map<Transmitter,Set<gu.Point>> {
 }
 
 export function findAntiNodes(transmitters:Map<Transmitter,Set<gu.Point>>, grid:Grid) {
-
     const retVal = new Set<gu.Point>();
     
     for(const [_,locs] of transmitters)
     for(const [a,b] of genPairs([...locs])) {
         const delta = gu.subtractPoints(b,a);
-
-        //d = b-a
-        //n1 = a - (b-a)
-        //n2 = b + (b-a)
 
         const nodeOne = gu.subtractPoints(a,delta);
         const nodeTwo = gu.addPoints(b,delta);
