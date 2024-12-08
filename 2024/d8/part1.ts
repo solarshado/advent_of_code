@@ -1,5 +1,5 @@
-import { runMain, sum, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
+import { runMain, } from "../util.ts";
+import { count, } from "../iter_util.ts";
 import * as gu from "../grid_util.ts";
 import { genPairs } from "../iter_util.ts";
 

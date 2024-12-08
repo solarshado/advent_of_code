@@ -1,5 +1,5 @@
 import { runMain, gcd, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
+import { count, } from "../iter_util.ts";
 import * as gu from "../grid_util.ts";
 import { genPairs } from "../iter_util.ts";
 import { findTransmitters, Transmitter, Grid } from './part1.ts';
