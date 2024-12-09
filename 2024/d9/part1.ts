@@ -1,13 +1,12 @@
-import { runMain, sum, } from "../util.ts";
-import { count, map, repeat } from "../iter_util.ts";
+import { runMain, } from "../util.ts";
+import { repeat } from "../iter_util.ts";
 
 export type DiskMap = (number|".")[];
 
 export function parseDiskMap(str:string) {
     const parts = str.split("").map(Number);
 
-    // consume all RAM
-    // would choke on zero-lenght files....
+    // would choke on zero-length files....
     const expanded = parts.flatMap((n,i)=>Array.from(repeat(i%2===0?Math.floor(i/2):".",n)));
 
     return expanded as DiskMap;
@@ -25,8 +24,6 @@ function defrag(disk:DiskMap) {
 
         while(end === '.')
             end = disk[--cursorEnd];
-
-        // TODO cksum
 
         while(start !== '.') {
             ckSum += start * cursorStart;
