@@ -48,21 +48,15 @@ export function pointToKey([x,y]:Point):string {
 
 export type Grid<T> = T[][];
 
-export function parseGrid<T>(lines:string[]):Grid<T>;
-/** @deprecated */
-export function parseGrid<T>(lines:string[], callback:(pos:Point,tile:T)=>void):Grid<T>;
+export function parseGrid<T extends string>(lines:string[]):Grid<T>;
 
-export function parseGrid<T>(lines:string[], callback?:(pos:Point,tile:T)=>void):Grid<T> {
-    if(typeof callback == "undefined")
+export function parseGrid<T>(lines:string[], mapper:(rawTile:string)=>T):Grid<T>;
+
+export function parseGrid<T>(lines:string[], mapper?:(rawTile:string)=>T):Grid<T> {
+    if(typeof mapper === "undefined")
         return lines.map(l=>l.split("") as T[]);
-    else {
-        throw "stop it, get some help";
-        //return lines.map((l,y)=> l.split("").map((c,x)=>{
-        //    const t = c as T;
-        //    callback([x,y],t);
-        //    return t
-        //}));
-    }
+    else
+        return lines.map(l=> l.split("").map(c=>mapper(c)));
 }
 
 export function transpose<T>(grid:Grid<T>):Grid<T> {

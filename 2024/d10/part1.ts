@@ -35,10 +35,7 @@ export function rateTrailhead(map:Grid, trailhead:gu.Point):number {
 export async function main(lines:string[]) {
     const cleanedLines = lines.map(l=>l.trim()).filter(l=>l!='');
 
-    /// types may be wrong?
-    const strMap = gu.parseGrid<Tile>(cleanedLines);
-    // so fix them
-    const map = strMap.map(col=>col.map(Number)) as Grid;
+    const map = gu.parseGrid<Tile>(cleanedLines, s=>(+s) as Tile);
 
     const trailheads = gu.findAll(map,0);
 
