@@ -1,5 +1,7 @@
 import { runMain, sum, } from "../util.ts";
 import { count, map } from "../iter_util.ts";
+import { memoize, pipe, } from '../func_util.ts';
+import * as gu from "../grid_util.ts";
 import { } from './part1.ts';
 
 function foo() {
