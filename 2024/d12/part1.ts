@@ -1,13 +1,11 @@
 import { runMain, sum, } from "../util.ts";
-import { count, map, concat, toArray, reduce } from "../iter_util.ts";
-import { memoize, pipe, } from '../func_util.ts';
+import {  map, concat, toArray, reduce } from "../iter_util.ts";
 import * as gu from "../grid_util.ts";
 
 export type Tile = string;
 export type Grid = gu.Grid<Tile>;
 
 export function findCrops(map:Grid) {
-
     const regions = new Map<string, Set<gu.Point>>();
 
     for(let y = 0 ; y < gu.gridHeight(map) ; ++y)
@@ -76,9 +74,6 @@ export function getAreaAndPerimiter(regions:Map<string, Set<gu.Point>[]>) {
                     map(regions, ([crop,pointSets])=> {
                         const rets = pointSets.map(region=>{
                             const area = region.size;
-
-                            /// additive or subtractive?
-                            // finding common edges seems like it might be faster at riuntime but trickier to implement
 
                             const perimiter = reduce(region,(acc,cur)=>{
                                 const friendlyNeighbors = 
