@@ -6,7 +6,7 @@ import * as gu from "../grid_util.ts";
 export type Tile = string;
 export type Grid = gu.Grid<Tile>;
 
-function findCrops(map:Grid) {
+export function findCrops(map:Grid) {
 
     const regions = new Map<string, Set<gu.Point>>();
 
@@ -23,7 +23,7 @@ function findCrops(map:Grid) {
     return regions;
 }
 
-function determineRegions(crops:Map<string, Set<gu.Point>>): Map<string, Set<gu.Point>[]> {
+export function determineRegions(crops:Map<string, Set<gu.Point>>): Map<string, Set<gu.Point>[]> {
     // for each crop, break into contiguous regions
     return new Map<string, Set<gu.Point>[]>(
         map(crops, ([crop,pointSet])=> {
