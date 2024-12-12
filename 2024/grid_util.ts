@@ -9,7 +9,15 @@ function _PointMultitonStoreKeyFunc(x:number,y:number):string {
 
 // like "singleton", but there's multiples, geddit? 
 // don't blame me: https://en.wikipedia.org/wiki/Multiton_pattern
-export function getPointMultiton(x:number, y:number):Point {
+export function getPointMultiton(p:Point):Point
+export function getPointMultiton(x:number, y:number):Point
+
+export function getPointMultiton(xOrP:number|Point, maybeY?:number):Point {
+
+    const [x,y] = Array.isArray(xOrP) ? xOrP as Point :
+                    maybeY === undefined ? yeet("bad params") :
+                    [xOrP,maybeY] as Point;
+
     const key = _PointMultitonStoreKeyFunc(x,y);
 
     const had = _PointMultitonStore.get(key);
@@ -144,8 +152,19 @@ export function areOppositeDirections(l:Direction, r:Direction):boolean {
     );
 }
 
+// todo overload with optional grid to constrain to
+export function getManhattanNeighborhood([x,y]:Point):Point[] {
+    return [
+        [x+ 0,y+ -1],
+        [x+ 0,y+ +1],
+        [x+ -1,y+ 0],
+        [x+ +1,y+ 0],
+    ];
+}
+
 // from 2023d21p1
 
+/// wtf? rename or rework this...
 export function getNeighborhoodCoords(grid:Grid<unknown>, [x,y]:Point) {
     const minX = Math.max(x-1,0);
     const maxX = Math.min(x+1,gridWidth(grid)-1);
