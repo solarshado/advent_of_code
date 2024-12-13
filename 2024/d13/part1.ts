@@ -1,6 +1,5 @@
 import { runMain, splitArray, sum, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
-import { memoize, pipe, } from '../func_util.ts';
+import { memoize, } from '../func_util.ts';
 import * as gu from "../grid_util.ts";
 
 export const btnACost = 3, btnBCost = 1;
@@ -19,43 +18,6 @@ export function parseMachine(lines:string[]):Machine {
     return { buttonA, buttonB, prize };
 }
 
-/* -- wikipedia excerpt
-The Chinese remainder theorem can be generalized to non-coprime moduli. Let 
-m , n , a , b
- be any integers, let 
-g = gcd(m , n) ; M = lcm(m , n)
-, and consider the system of congruences:
-
-x ≡ a (mod m)
-x ≡ b (mod n)
-
-If a ≡ b (mod g) , then this system has a unique solution modulo 
-M = mn / g
-. Otherwise, it has no solutions.
-
-
-If one uses Bézout's identity to write 
-g = um + vn ,
-then the solution is given by
-x = (a v n + b u m) / g
-
-This defines an integer, as g divides both m and n. Otherwise, the proof is very similar to that for coprime moduli
-*/
-
-// !! the scores are needed here too?? yes, that's what we're trying to minimize
-// so
-// x = score?
-// x = goal value?
-// m , n = button a,b values?
-// a , b = button a,b presses?
-
-// u , v = button a,b costs?
-
-// hold on, a and b are remainders, right? shoulnt they be zero?
-// no...they're... the remainders after dividing goal by button values?
-// so x is the goal, m,n are the button values.
-
-
 const pushLimit = 100;
 
 export function mulPoint([x,y]:gu.Point, factor:number):gu.Point {
@@ -63,12 +25,6 @@ export function mulPoint([x,y]:gu.Point, factor:number):gu.Point {
 }
 
 export function findCheapestSolution(machine:Machine):number|false {
-    /////// hmmm....
-    // is this that "chinese remainder theorem" thing I've seen mantioned?
-
-    /// one axis at a time, or do the need to be "parallel"?
-    // somewhat?
-
     const {buttonA, buttonB, prize} = machine;
 
     const innerRecurse = memoize(_innerRecurse);
@@ -80,8 +36,6 @@ export function findCheapestSolution(machine:Machine):number|false {
         const aTot = mulPoint(buttonA, countA);
         const bTot = mulPoint(buttonB, countB);
         const tot = gu.addPoints(aTot,bTot);
-
-        //console.log({countA, countB, tot, prize});
 
         if(gu.pointsEqual(tot,prize))
             return {countA, countB};

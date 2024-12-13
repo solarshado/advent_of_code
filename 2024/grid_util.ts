@@ -42,6 +42,20 @@ export function subtractPoints([lx,ly]:Point,[rx,ry]:Point):Point {
     return [lx-rx,ly-ry];
 }
 
+export function pointModulo(n:Point, mod:Point):Point {
+    return [
+        n[0] % mod[0],
+        n[1] % mod[1]
+    ];
+}
+
+export function pointBinOp(l:Point, r:Point, op:(l:number,r:number)=>number):Point {
+    return [
+        op(l[0], r[0]),
+        op(l[1], r[1])
+    ];
+}
+
 export function manhattanDistance([lx,ly]:Point, [rx,ry]:Point):number {
     const dist = Math.abs(lx-rx) + Math.abs(ly-ry);
     return dist;

@@ -1,8 +1,6 @@
-import { gcd, lcm, runMain, splitArray, sum, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
-import { memoize, pipe, } from '../func_util.ts';
+import { runMain, splitArray, sum, } from "../util.ts";
 import * as gu from "../grid_util.ts";
-import { Machine, btnACost, btnBCost, mulPoint } from './part1.ts';
+import { Machine, } from './part1.ts';
 
 function parseMachine(lines:string[]):Machine {
     const [buttonA,buttonB,prize] = lines.map(l=> {
@@ -17,27 +15,27 @@ function findCheapestSolution(machine:Machine):number|false {
     const {buttonA: [ax,ay], buttonB: [bx,by], prize: [px,py]} = machine;
 
     /*
-    px = ax*A + bx*B 
-    py = ay*A + by*B 
+    px = ax*A + bx*B
+    py = ay*A + by*B
 
     solve for A
 
-    px -bx*B = ax*A 
-    (px - bx*B)/ax = A 
+    px -bx*B = ax*A
+    (px - bx*B)/ax = A
     A = (px/ax) - (bx*B/ax)
 
     for B
-    py = ay*((px - bx*B)/ax) + by*B 
-    py = (ay/ax)*(px - bx*B) + by*B 
+    py = ay*((px - bx*B)/ax) + by*B
+    py = (ay/ax)*(px - bx*B) + by*B
 
     py/B = ((ay/ax)*(px - bx*B))/B + by
 
     ((ay/ax)*(px - bx*B))/B ----- aaaah
 
     for B, try 2
-    py = ay*((px/ax) - (bx*B/ax)) + by*B 
-    py = (ay*px/ax) - (ay*bx*B/ax) + by*B 
-    py - (ay*px/ax) = (ay*bx*B/ax) + by*B 
+    py = ay*((px/ax) - (bx*B/ax)) + by*B
+    py = (ay*px/ax) - (ay*bx*B/ax) + by*B
+    py - (ay*px/ax) = (ay*bx*B/ax) + by*B
 
     ax*(py - (ay*px/ax)) = ax*((ay*bx*B/ax) + by*B)
 
@@ -73,28 +71,12 @@ function findCheapestSolution(machine:Machine):number|false {
     return ans !== Math.trunc(ans) ? false : ans;
 }
 
-export function pointModulo(n:gu.Point, mod:gu.Point):gu.Point {
-    return [
-        n[0] % mod[0],
-        n[1] % mod[1]
-    ];
-}
-
-export function pointBinOp(l:gu.Point, r:gu.Point, op:(l:number,r:number)=>number):gu.Point {
-    return [
-        op(l[0], r[0]),
-        op(l[1], r[1])
-    ];
-}
-
 export async function main(lines:string[]) {
     const cleanedLines = lines.map(l=>l.trim())//.filter(l=>l!='');
 
     const values = splitArray(cleanedLines,"").filter(a=> a.length === 3);
 
     const machines = values.map(parseMachine);
-
-    //console.log(machines);
 
     const solutions = machines.map(findCheapestSolution);
 
