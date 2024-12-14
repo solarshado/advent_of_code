@@ -1,8 +1,7 @@
-import { product, runMain, sum, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
-import { memoize, pipe, } from '../func_util.ts';
+import { positiveModulo, product, runMain, } from "../util.ts";
 import * as gu from "../grid_util.ts";
 
+// for example input
 //export const maxX = 11, maxY = 7;
 export const maxX = 101, maxY = 103;
 
@@ -19,18 +18,11 @@ export function parseRobot(line:string):Robot {
     };
 }
 
-// translated from  https://stackoverflow.com/a/1082938/
-export function positiveModulo(x:number, m:number) {
-    return (x%m + m)%m;
-}
-
 export function simRobotMovement(robots:Robot[], steps:number, maxX:number, maxY:number):Robot[] {
     return robots.map(({pos,vel})=>{
         const [posX,posY] = pos;
         const [velX,velY] = vel;
 
-        // gotta handle negative positions....
-        // hmm...
         const newPos = [
             positiveModulo(posX + (velX*steps), maxX),
             positiveModulo(posY + (velY*steps), maxY)
