@@ -89,3 +89,9 @@ export function joinArrays<T>(src:T[][], elem:T):T[] {
 export const gcd = (a:number, b:number):number => b == 0 ? a : gcd(b, a % b)
 export const lcm = (a:number, b:number) =>  a / gcd(a, b) * b
 export const lcmAll = (ns:number[]) => ns.reduce(lcm, 1)
+
+// translated from  https://stackoverflow.com/a/1082938/
+export function positiveModulo(x:number, m:number) {
+    return (x%m + m)%m;
+}
+
