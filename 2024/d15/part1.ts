@@ -1,6 +1,4 @@
-import { runMain, splitArray, sum, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
-import { memoize, pipe, } from '../func_util.ts';
+import { runMain, splitArray, } from "../util.ts";
 import * as gu from "../grid_util.ts";
 
 export type Tile = "#"|"O"|"."|"@";
@@ -16,12 +14,7 @@ export function mapDirection(char:string):gu.Point {
     }
 }
 
-function runSim(grid:gu.Grid<Tile>, directions:gu.Point[]):gu.Grid<Tile> {
-    //// feels like there should be some possible optimizations here...
-
-    /// would conveting to Map<point,tile> be worthwhile????
-    // maybe try later
-
+export function runSim(grid:gu.Grid<Tile>, directions:gu.Point[]):gu.Grid<Tile> {
     let robotPos = gu.findAll(grid, "@")[0];
     const curGrid = grid.map(c=>[...c]) as gu.Grid<Exclude<Tile,"@">>;
     gu.setTile(robotPos, curGrid, ".");
@@ -42,31 +35,14 @@ function runSim(grid:gu.Grid<Tile>, directions:gu.Point[]):gu.Grid<Tile> {
         return tryMoveBox(tryDestLoc,direction) && tryMoveBox(boxPos,direction);
     }
 
-    function renderState(header:string) {
-        return;
-        console.log(header);
-        console.log(gu.renderGrid(
-            curGrid.map((r,y)=>r.map((t,x)=> (x === robotPos[0] && y === robotPos[1]) ? "@" : t))
-        ));
-    }
-
-    renderState("init");
     for(const move of directions) {
         const tryDestLoc = gu.addPoints(robotPos,move);
 
         if(gu.getTileFrom(tryDestLoc, curGrid) ===  "O") 
             tryMoveBox(tryDestLoc,move);
 
-        if(gu.getTileFrom(tryDestLoc, curGrid) == ".")// {
+        if(gu.getTileFrom(tryDestLoc, curGrid) == ".")
             robotPos = tryDestLoc;
-        //    continue;
-        //}
-        //else if(tryDestTile == "#") {
-        //    continue;
-        //}
-        //// missing anything???
-
-        renderState("move "+move);
     }
 
     gu.setTile(robotPos, curGrid, "@");
@@ -81,12 +57,9 @@ export async function main(lines:string[]) {
 
     rawDirections = rawDirections.join("").split("");
 
-    //rawDirections = rawDirections.splice(0,15);
-
     const grid = gu.parseGrid<Tile>(rawGrid);
     const directions = rawDirections.map(mapDirection);
 
-    //console.log({rawGrid,rawDirections,grid,directions});
     console.log({rawDirections});
 
     const result = runSim(grid,directions);

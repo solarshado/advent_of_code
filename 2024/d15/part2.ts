@@ -1,6 +1,4 @@
-import { runMain, splitArray, sum, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
-import { memoize, pipe, } from '../func_util.ts';
+import { runMain, splitArray, } from "../util.ts";
 import * as gu from "../grid_util.ts";
 import * as p1 from './part1.ts';
 import { mapDirection } from './part1.ts';
@@ -59,7 +57,6 @@ function runSim(grid:gu.Grid<Tile>, directions:gu.Point[]):gu.Grid<Tile> {
             return true;
         }
 
-        ////// brain, please function, this should not be that difficult
         const nextBoxes =
             tryDestTileL === "[" ?
             [tryDestLocL] :
@@ -67,11 +64,7 @@ function runSim(grid:gu.Grid<Tile>, directions:gu.Point[]):gu.Grid<Tile> {
                 tryDestTileL === "]" ? [tryDestLocL] : [],
                 tryDestTileR === "[" ? [tryDestLocR] : [],
             ].flat();
-        //const nextBoxes = [ // will, at times, check the same box twice... meaning it may also MOVE the same box twice!
-        //    tryDestTileL === "[" || tryDestTileL === "]" ? [tryDestLocL] : [],
-        //    tryDestTileR === "[" || tryDestTileR === "]" ? [tryDestLocR] : [],
-        //].flat();
-        //
+
         const canMove = nextBoxes.every(n=>tryMoveBoxVert(n,direction,true));
 
         if(!canMove) return false;
@@ -80,28 +73,14 @@ function runSim(grid:gu.Grid<Tile>, directions:gu.Point[]):gu.Grid<Tile> {
         return nextBoxes.every(n=>tryMoveBoxVert(n,direction)) && tryMoveBoxVert(boxPos,direction);
     }
 
-    function renderState(header:string) {
-        return;
-        console.log(header);
-        console.log(gu.renderGrid(
-            curGrid.map((r,y)=>r.map((t,x)=> (x === robotPos[0] && y === robotPos[1]) ? "@" : t))
-        ));
-    }
-
-    renderState("init");
     for(const move of directions) {
         const tryDestLoc = gu.addPoints(robotPos,move);
 
-        if((["[","]"] as const).some(t=>gu.getTileFrom(tryDestLoc, curGrid) ===  t)) {
-        renderState("pre-move "+move);
+        if((["[","]"] as const).some(t=>gu.getTileFrom(tryDestLoc, curGrid) ===  t))
             (move[0] === 0 ? tryMoveBoxVert : tryMoveBoxHoriz)(tryDestLoc,move);
-        renderState("post-move "+move);
-        }
 
         if(gu.getTileFrom(tryDestLoc, curGrid) == ".")
             robotPos = tryDestLoc;
-
-        //renderState("move "+move);
     }
 
     gu.setTile(robotPos, curGrid, "@");
@@ -126,9 +105,6 @@ export async function main(lines:string[]) {
 
     const grid = expand(gu.parseGrid<p1.Tile>(rawGrid));
     const directions = rawDirections.join("").split("").map(mapDirection);
-
-    //console.log({rawGrid,rawDirections,grid,directions});
-    //console.log({grid});
 
     const result = runSim(grid,directions);
 
