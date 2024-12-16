@@ -1,6 +1,4 @@
-import { runMain, sum, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
-import { memoize, pipe, } from '../func_util.ts';
+import { runMain, } from "../util.ts";
 import * as gu from "../grid_util.ts";
 
 export type Tile = "#"|"."|"S"|"E";
@@ -9,7 +7,7 @@ export type Grid = gu.Grid<Tile>;
 /// pathfinding time... A*, Disjykra's (mispelled that probably) ... I froget the difference
 // gonna need a priority queue to do it right though
 
-class ProprityQueue<T> {
+export class ProprityQueue<T> {
     #inner = new Map<number,T[]>();
 
     #prioCache:number[] = [];
@@ -31,17 +29,17 @@ class ProprityQueue<T> {
             return g;
 
         this.#prioCache = this.#prioCache.filter(p=>this.#inner.get(p)?.length ?? 0 > 0);
-        return this.#inner.get(this.#prioCache.at(at)!)!;
+        return this.#inner.get(this.#prioCache.at(at)!) ?? [];
     }
 
-    getLowest(peekOnly=false):T {
+    getLowest(peekOnly=false):T|undefined {
         const group = this.#getGroup(0)
-        return peekOnly ? group[0] : group.shift()!;
+        return peekOnly ? group[0] : group.shift();
     }
 
-    getHighest(peekOnly=false):T {
+    getHighest(peekOnly=false):T|undefined {
         const group = this.#getGroup(-1)
-        return peekOnly ? group[0] : group.shift()!;
+        return peekOnly ? group[0] : group.shift();
     }
 }
 
@@ -76,7 +74,7 @@ export const TurnLookup = {
 export function withMoveApplied({loc,facing,totalCost}:NavState, {action, cost}:Move):NavState {
     return {
         loc: action === "F" ? gu.getPointMultiton(gu.addPoints(loc, gu.directionMap[facing] )) : loc,
-        facing: action === "F" ? facing : TurnLookup[facing][action] ,
+        facing: action === "F" ? facing : TurnLookup[facing][action],
         totalCost: totalCost + cost
     };
 }
@@ -111,7 +109,7 @@ export function findCheapestPath(maze:Grid, start:gu.Point, goal:gu.Point):numbe
     enqueue({loc: start, facing: "R", totalCost:0});
 
     while(true) {
-        const cur = queue.getLowest();
+        const cur = queue.getLowest()!;
 
         if(gu.pointsEqual(cur.loc,goal))
             return cur.totalCost;
