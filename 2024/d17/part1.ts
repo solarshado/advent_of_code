@@ -1,7 +1,4 @@
-import { runMain, splitArray, sum, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
-import { memoize, pipe, } from '../func_util.ts';
-import * as gu from "../grid_util.ts";
+import { runMain, } from "../util.ts";
 
 export type Computer = {
     A:number,
