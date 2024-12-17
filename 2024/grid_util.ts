@@ -42,6 +42,10 @@ export function subtractPoints([lx,ly]:Point,[rx,ry]:Point):Point {
     return [lx-rx,ly-ry];
 }
 
+export function multiplyPoint([x,y]:Point, factor:number):Point {
+    return [x*factor, y*factor];
+}
+
 export function pointModulo(n:Point, mod:Point):Point {
     return [
         n[0] % mod[0],
@@ -115,11 +119,38 @@ export function column<T>(grid:Grid<T>, x:number) {
     return grid.map(line=>line[x]);
 }
 
-export function getTileFrom<T>([x, y]:Point, grid:Grid<T>):T {
+export function isAPoint(ary:unknown):ary is Point {
+    return Array.isArray(ary) &&
+        ary.length === 2 &&
+        typeof ary[0] === "number" &&
+        typeof ary[1] === "number";
+}
+
+/** @deprecated use other param order */
+export function getTileFrom<T>([x, y]:Point, grid:Grid<T>):T;
+export function getTileFrom<T>(grid:Grid<T>, [x, y]:Point,):T;
+
+export function getTileFrom<T>(first:Point|Grid<T>, second:Point|Grid<T>):T {
+    const [grid, [x,y]] =
+        isAPoint(second) ?
+        //(first.length === 2 && typeof first[1] === "number") ?
+        [first as Grid<T>,second] :
+        [second,first as Point];
+
   return grid[y][x];
 }
 
-export function setTile<T>([x, y]:Point, grid:Grid<T>, t:T) {
+/** @deprecated use other param order */
+export function setTile<T>([x, y]:Point, grid:Grid<T>, t:T):void;
+export function setTile<T>(grid:Grid<T>, [x, y]:Point, t:T):void;
+
+export function setTile<T>(first:Point|Grid<T>, second:Point|Grid<T>, t:T):void {
+    const [grid, [x,y]] =
+        isAPoint(second) ?
+        //(first.length === 2 && typeof first[1] === "number") ?
+        [first as Grid<T>,second] :
+        [second,first as Point];
+
   grid[y][x] = t;
 }
 
@@ -140,12 +171,10 @@ export function renderGrid<T>(grid:Grid<T>) {
 export function renderPoints<T>(grid:Grid<T>, points:Iterable<Point>, tile:string) {
   const copy = (grid as Grid<T|string>).map(l => [...l]);
   for (const p of points) {
-    setTile(p, copy, tile);
+    setTile(copy, p, tile);
   }
   return renderGrid(copy);
 }
-
-// nickd from 2023d17p1
 
 export const DIRECTIONS = ["U","D","L","R"] as const;
 export type Direction = typeof DIRECTIONS[number];
@@ -156,6 +185,13 @@ export const directionMap:{ [key in Direction]: Point } = {
     L: [-1,0],
     R: [+1,0],
 };
+
+export const turnMap/*:{ [key in Direction]: { [key in "L"|"R"]: Direction} }*/ = {
+    U: {L: "L",R: "R"},
+    D: {L: "R",R: "L"},
+    L: {L: "D",R: "U"},
+    R: {L: "U",R: "D"},
+} as const;
 
 export function areOppositeDirections(l:Direction, r:Direction):boolean {
     return (

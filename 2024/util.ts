@@ -85,6 +85,42 @@ export function joinArrays<T>(src:T[][], elem:T):T[] {
     return src.reduce((l,r)=>l.concat(elem, ...r));
 }
 
+export class ProprityQueue<T> {
+    #inner = new Map<number,T[]>();
+
+    #prioCache:number[] = [];
+
+    add(prio:number, val:T) {
+        if(!this.#inner.has(prio)) {
+            this.#inner.set(prio,[]);
+
+            this.#prioCache.push(prio);
+            this.#prioCache.sort((l,r)=>l-r);
+        }
+
+        this.#inner.get(prio)!.push(val);
+    }
+
+    #getGroup(at:number):T[] {
+        const g = this.#inner.get(this.#prioCache.at(at)!)!;
+        if(g.length !== 0)
+            return g;
+
+        this.#prioCache = this.#prioCache.filter(p=>this.#inner.get(p)?.length ?? 0 > 0);
+        return this.#inner.get(this.#prioCache.at(at)!) ?? [];
+    }
+
+    getLowest(peekOnly=false):T|undefined {
+        const group = this.#getGroup(0)
+        return peekOnly ? group[0] : group.shift();
+    }
+
+    getHighest(peekOnly=false):T|undefined {
+        const group = this.#getGroup(-1)
+        return peekOnly ? group[0] : group.shift();
+    }
+}
+
 // these 3 stolen from https://stackoverflow.com/a/61352020/
 export const gcd = (a:number, b:number):number => b == 0 ? a : gcd(b, a % b)
 export const lcm = (a:number, b:number) =>  a / gcd(a, b) * b
