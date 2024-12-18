@@ -85,7 +85,7 @@ export function joinArrays<T>(src:T[][], elem:T):T[] {
     return src.reduce((l,r)=>l.concat(elem, ...r));
 }
 
-export class ProprityQueue<T> {
+export class PriorityQueue<T> {
     #inner = new Map<number,T[]>();
 
     #prioCache:number[] = [];
@@ -115,11 +115,24 @@ export class ProprityQueue<T> {
         return peekOnly ? group[0] : group.shift();
     }
 
+    get minExtantPriority() {
+        void(this.#getGroup(0)); // ensure cache updateed
+        return this.#prioCache.at(0);
+    }
+
     getHighest(peekOnly=false):T|undefined {
         const group = this.#getGroup(-1)
         return peekOnly ? group[0] : group.shift();
     }
+
+    get maxExtantPriority() {
+        void(this.#getGroup(-1)); // ensure cache updateed
+        return this.#prioCache.at(-1);
+    }
 }
+
+/** @deprecated */
+export const ProprityQueue = PriorityQueue;
 
 // these 3 stolen from https://stackoverflow.com/a/61352020/
 export const gcd = (a:number, b:number):number => b == 0 ? a : gcd(b, a % b)
