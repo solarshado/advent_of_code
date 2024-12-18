@@ -1,6 +1,4 @@
-import { PriorityQueue, runMain, sum, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
-import { memoize, pipe, } from '../func_util.ts';
+import { PriorityQueue, runMain, } from "../util.ts";
 import * as gu from "../grid_util.ts";
 
 //export const SIZE = 6;
@@ -22,17 +20,17 @@ export function buildMemSpace(bytes:gu.Point[]):MemSpace {
     return new Map(bytes.map((b,i)=>[b,i]));
 }
 
-export function getValidNextMoves(loc:gu.Point, space:MemSpace) {
-    return gu.getManhattanNeighborhood(loc)
-        .map(p=>gu.getPointMultiton(p))
-        .filter(([x,y])=>
-            x >= 0 && x <= SIZE &&
-            y >= 0 && y <= SIZE &&
-            !space.has(gu.getPointMultiton(x,y))
-        );
-}
+export function findShortestPath(startLoc:gu.Point, destLoc:gu.Point, space:MemSpace, SIZE:number):number {
 
-export function findShortestPath(startLoc:gu.Point, destLoc:gu.Point, space:MemSpace):number {
+    function getValidNextMoves(loc:gu.Point) {
+        return gu.getManhattanNeighborhood(loc)
+            .map(p=>gu.getPointMultiton(p))
+            .filter(([x,y])=>
+                        x >= 0 && x <= SIZE &&
+                        y >= 0 && y <= SIZE &&
+                        !space.has(gu.getPointMultiton(x,y))
+                   );
+    }
 
     const seen = new Set<gu.Point>();
 
@@ -43,12 +41,12 @@ export function findShortestPath(startLoc:gu.Point, destLoc:gu.Point, space:MemS
         const curDist = toVisit.minExtantPriority!;
         const cur = toVisit.getLowest()!;
 
-        console.log({cur,curDist});
+        //console.log({cur,curDist});
 
         if(gu.pointsEqual(cur,destLoc))
             return curDist;
 
-        for(const next of getValidNextMoves(cur,space)) {
+        for(const next of getValidNextMoves(cur)) {
             //console.log({cur,curDist,next});
             if(!seen.has(next)) {
                 seen.add(next);
@@ -57,7 +55,7 @@ export function findShortestPath(startLoc:gu.Point, destLoc:gu.Point, space:MemS
         }
     }
 
-    throw "no path found!";
+    return Number.POSITIVE_INFINITY;
 }
 
 export async function main(lines:string[]) {
@@ -67,9 +65,7 @@ export async function main(lines:string[]) {
 
     const memSpace = buildMemSpace(bytes);
 
-    //console.log(memSpace);
-
-    const answer = findShortestPath(startPos,destPos,memSpace);
+    const answer = findShortestPath(startPos,destPos,memSpace,SIZE);
 
     console.log(answer);
 }

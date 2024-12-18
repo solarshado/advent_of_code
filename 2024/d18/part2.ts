@@ -1,9 +1,14 @@
-import { runMain, sum, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
-import { memoize, pipe, } from '../func_util.ts';
+import { runMain, } from "../util.ts";
 import * as gu from "../grid_util.ts";
 import * as p1 from './part1.ts';
-import { SIZE, LANDED_BYTES, startPos, destPos } from './part1.ts';
+
+//export const SIZE = 6;
+//export const LANDED_BYTES = 12;
+export const SIZE = 70;
+export const LANDED_BYTES = 1024;
+
+export const startPos = gu.getPointMultiton(0,0);
+export const destPos = gu.getPointMultiton(SIZE,SIZE);
 
 export async function main(lines:string[]) {
     const cleanedLines = lines.map(l=>l.trim()).filter(l=>l!='');
@@ -12,38 +17,25 @@ export async function main(lines:string[]) {
 
     let landedCount = LANDED_BYTES;
 
-    const blankGrid = gu.genGrid(SIZE+1,SIZE+1);
-
-    console.log({blankGrid});
-
     while(true) {
-
-        //if(landedCount ==21)
-        //   debugger;
-
         const landedBytes = bytes.slice(0,landedCount);
-
         const memSpace = p1.buildMemSpace(landedBytes);
 
-        //console.log(memSpace);
-        console.log(gu.renderPoints(blankGrid, landedBytes, "#"));
-
-        const pathCost = p1.findShortestPath(startPos,destPos,memSpace);
+        const pathCost = p1.findShortestPath(startPos,destPos,memSpace,SIZE);
         const canTraverse = Number.isFinite(pathCost);
 
-        console.log({landedCount,pathCost,canTraverse});
+        //console.log({landedCount,pathCost,canTraverse});
 
         if(!canTraverse)
             break;
-        else
-            landedCount++;
+
+        landedCount++;
 
         if(landedCount > bytes.length)
             throw "never got blocked";
     }
 
     const answer = bytes[landedCount-1];
-
     console.log(answer);
 }
 
