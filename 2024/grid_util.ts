@@ -85,6 +85,10 @@ export function parseGrid<T>(lines:string[], mapper?:(rawTile:string)=>T):Grid<T
         return lines.map(l=> l.split("").map(c=>mapper(c)));
 }
 
+export function genGrid<T=".">(width:number, height:number, tile="."):Grid<T> {
+    return Array(height).fill(Array(width).fill(tile));
+}
+
 export function transpose<T>(grid:Grid<T>):Grid<T> {
     return grid[0].map((_,i)=>column(grid,i));
 }
