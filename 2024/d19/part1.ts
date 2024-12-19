@@ -1,15 +1,10 @@
 import { runMain, sum, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
-import { memoize, pipe, } from '../func_util.ts';
-import * as gu from "../grid_util.ts";
+import { memoize, } from '../func_util.ts';
 
-export type Color = "w"|"u"|"b"|"r"|"g"
-
-// hacky, ignoring pieces, but might work
-const canMakePattern = memoize(_canMakePattern, (t,_)=>t);
+// hacky, ignoring pieces, but works for this
+export const canMakePattern = memoize(_canMakePattern, (t,_)=>t);
 
 export function _canMakePattern(target:string, pieces:string[]):boolean {
-    /// huh, this is more or less pathfinding again
 
     if(target.length === 0) return true;
 
@@ -40,7 +35,6 @@ export async function main(lines:string[]) {
     console.log({canMake})
 
     const answer = sum(canMake, ({canMake})=> +canMake);
-
 
     console.log(answer);
 }

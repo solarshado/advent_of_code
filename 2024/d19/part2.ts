@@ -1,14 +1,11 @@
 import { runMain, sum, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
-import { memoize, pipe, } from '../func_util.ts';
-import * as gu from "../grid_util.ts";
+import { memoize, } from '../func_util.ts';
 import { parseInput } from './part1.ts';
 
 // hacky, ignoring pieces, but might work
 export const countWaysToMakeTarget = memoize(_countWaysToMakeTarget, (t,_)=>t);
 
 export function _countWaysToMakeTarget(target:string, pieces:string[]):number {
-
     if(target.length === 0) return 1; // ... there *is* only one empty set...
 
     const validPrefixes = pieces.filter(p=>target.startsWith(p));
@@ -30,7 +27,6 @@ export async function main(lines:string[]) {
     console.log({counts})
 
     const answer = sum(counts, ({count})=> +count);
-
 
     console.log(answer);
 }
