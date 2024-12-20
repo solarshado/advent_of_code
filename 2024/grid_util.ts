@@ -207,8 +207,13 @@ export function areOppositeDirections(l:Direction, r:Direction):boolean {
 }
 
 // todo overload with optional grid to constrain to
-export function getManhattanNeighborhood([x,y]:Point):Point[] {
-    return [
+export function getManhattanNeighborhood([x,y]:Point):Point[];
+export function getManhattanNeighborhood([x,y]:Point, grid:Grid<unknown>):Point[];
+
+export function getManhattanNeighborhood([x,y]:Point, grid?:Grid<unknown>):Point[] {
+    return (grid) ?
+        getManhattanNeighborhood([x,y]).filter(p=>isPointOnGrid(p,grid)) :
+    [
         [x+ 0,y+ -1],
         [x+ 0,y+ +1],
         [x+ -1,y+ 0],
