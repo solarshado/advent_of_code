@@ -1,6 +1,5 @@
-import { runMain, sum, } from "../util.ts";
-import { count, map, toArray } from "../iter_util.ts";
-import { memoize, pipe, } from '../func_util.ts';
+import { runMain, } from "../util.ts";
+import { map, toArray } from "../iter_util.ts";
 import * as gu from "../grid_util.ts";
 
 export type Tile = "#"|"."|"S"|"E";
@@ -10,9 +9,7 @@ export type Grid = gu.Grid<Tile>;
 export type CostMap = Map<gu.Point,number>;
 export type CheatPath = {start:gu.Point, end:gu.Point, saving:number};
 
-
-
-export function buildCostMap(grid:Grid, startLoc:gu.Point, endLoc:gu.Point):CostMap {
+export function buildCostMap(grid:Grid, startLoc:gu.Point):CostMap {
     startLoc = gu.getPointMultiton(startLoc)
 
     const retVal = new Map<gu.Point,number>();
@@ -23,8 +20,6 @@ export function buildCostMap(grid:Grid, startLoc:gu.Point, endLoc:gu.Point):Cost
     while(toVisit.length > 0) {
         const cur = toVisit.shift()!;
         const curCost = retVal.get(cur)!;
-
-        //console.log({cur,toVisit});
 
         const neighbors =
             gu.getManhattanNeighborhood(cur)
@@ -41,7 +36,7 @@ export function buildCostMap(grid:Grid, startLoc:gu.Point, endLoc:gu.Point):Cost
     return retVal;
 }
 
-export function findShortcuts(grid:Grid, costMap:CostMap):CheatPath[] {
+export function findShortcuts( costMap:CostMap):CheatPath[] {
     return toArray(map(costMap.entries(), ([loc, cost])=>
         gu.DIRECTIONS.reduce((acc:CheatPath[],dir)=> {
             const delta = gu.directionMap[dir];
@@ -49,9 +44,6 @@ export function findShortcuts(grid:Grid, costMap:CostMap):CheatPath[] {
 
             if(costMap.has(start))
                 return acc;
-
-            //const dir2 = gu.getPointMultiton(gu.multiplyPoint(dirP,2));
-            //const end = gu.getPointMultiton(gu.addPoints(loc,dir2));
 
             const end = gu.getPointMultiton(gu.addPoints(start,delta));
             const saving = (costMap.get(end) ?? NaN) - (cost + 2);
@@ -79,11 +71,11 @@ export async function main(lines:string[]) {
 
     console.log(gu.renderGrid(track));
 
-    const costMap = buildCostMap(track, startLoc, endLoc);
+    const costMap = buildCostMap(track, startLoc);
 
     console.log(costMap);
 
-    const shortcuts = findShortcuts(track, costMap);
+    const shortcuts = findShortcuts( costMap);
 
     console.log(shortcuts);
 

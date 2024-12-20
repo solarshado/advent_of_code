@@ -1,6 +1,6 @@
-import { runMain, sum, } from "../util.ts";
-import { count, filter, genPairs, map, range, reduce, toArray } from "../iter_util.ts";
-import { memoize, pipe, } from '../func_util.ts';
+import { runMain, } from "../util.ts";
+import { filter, genPairs, map, toArray } from "../iter_util.ts";
+import { pipe, } from '../func_util.ts';
 import * as gu from "../grid_util.ts";
 import { Tile, Grid, CostMap, CheatPath, buildCostMap } from './part1.ts';
 
@@ -9,7 +9,7 @@ const MAX_SHORTCUT_LENGTH = 20;
 //const MIN_SHORTCUT_SAVINGS = 50; // example
 const MIN_SHORTCUT_SAVINGS = 100; // full
 
-function findShortcuts(grid:Grid, costMap:CostMap):CheatPath[] {
+function findShortcuts( costMap:CostMap):CheatPath[] {
 
     const pairs = pipe(
         genPairs([...costMap.entries()]),
@@ -45,11 +45,9 @@ export async function main(lines:string[]) {
 
     console.log(gu.renderGrid(track));
 
-    const costMap = buildCostMap(track, startLoc, endLoc);
+    const costMap = buildCostMap(track, startLoc);
 
-    //console.log(costMap);
-
-    const shortcuts = findShortcuts(track, costMap);
+    const shortcuts = findShortcuts( costMap);
 
     console.log(shortcuts);
 
@@ -57,13 +55,13 @@ export async function main(lines:string[]) {
     //                                    acc[cur.saving] = (acc[cur.saving] ?? 0) + 1,
     //                                        acc)
     //                                    ,{} as { [key:number]:number });
-
+    //
     //console.log(aggregated);
-
+    //
     //const answer = Object.entries(aggregated).reduce(
-        //(acc,[saved,shortcutCount])=> Number(saved) >= MIN_SHORTCUT_SAVINGS ? acc + shortcutCount : acc,0);
+    //    (acc,[saved,shortcutCount])=> Number(saved) >= MIN_SHORTCUT_SAVINGS ? acc + shortcutCount : acc,0);
 
-    const answer = shortcuts.length; //?
+    const answer = shortcuts.length;
 
     console.log(answer);
 }
