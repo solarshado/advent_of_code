@@ -1,13 +1,13 @@
 import { Predicate } from "./func_util.ts";
 
-export type Main = (inputLines:string[])=>Promise<void>;
+export type Main = (inputLines:string[], srcFilename?:"input.txt"|"example.txt")=>Promise<void>;
 export async function runMain(main:Main) {
     const [_,mode="e"] = Deno.args;
 
     const fileToLoad = mode == "m" ? "input.txt" :"example.txt";
     const inputLines = (await Deno.readTextFile(fileToLoad)).split(/\r|\n|\r\n/);
 
-    await main(inputLines);
+    await main(inputLines, fileToLoad);
 }
 
 export function yeet<T>(...t:T[]):never {

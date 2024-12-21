@@ -124,7 +124,7 @@ export function feedFileToFunction(inputFileName:string, codeFileName:string, fu
 
         const fileLines = (await Deno.readTextFile(inputFileName)).split('\n');
 
-        await func(fileLines);
+        await func(fileLines, inputFileName);
     },
     reason=>{
         console.error(`failed to import '${codeFileName}': ${reason}`);
