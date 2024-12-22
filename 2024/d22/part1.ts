@@ -1,9 +1,7 @@
-import { runMain, sum, } from "../util.ts";
-import { count, map, range } from "../iter_util.ts";
-import { memoize, pipe, } from '../func_util.ts';
-import * as gu from "../grid_util.ts";
+import { runMain, } from "../util.ts";
+import { range } from "../iter_util.ts";
 
-const ITERATIONS = 2000;
+export const ITERATIONS = 2000;
 
 export function nextSecret(secret:bigint):bigint {
     secret = prune(mix(secret * 64n,secret));

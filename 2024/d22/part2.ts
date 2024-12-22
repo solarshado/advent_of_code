@@ -1,7 +1,5 @@
-import { runMain, sum, } from "../util.ts";
-import { count, map, range, reduce, toArray } from "../iter_util.ts";
-import { memoize, pipe, } from '../func_util.ts';
-import * as gu from "../grid_util.ts";
+import { runMain, } from "../util.ts";
+import { range, reduce, toArray } from "../iter_util.ts";
 import { ITERATIONS, nextSecret } from './part1.ts';
 
 function buildPriceLists(initialSecrets:bigint[]) {
@@ -23,7 +21,7 @@ function buildPriceLists(initialSecrets:bigint[]) {
     return prices;
 }
 
-function findTopPrices(priceLists:ReturnType<typeof buildPriceLists>) {
+function findMaxBanannas(priceLists:ReturnType<typeof buildPriceLists>) {
 
     const withDeltas = priceLists.map((tick,i,pl)=>{
         const prev = pl[i-1];
@@ -64,24 +62,24 @@ function findTopPrices(priceLists:ReturnType<typeof buildPriceLists>) {
 
     const allTimes = new Set(dataBySeller.flatMap(s=>toArray(s.priceAt.keys())));
 
-    const foo = reduce(allTimes, (acc,curTime)=>
-                       Math.max(acc,
-                                dataBySeller.reduce((acc,{priceAt})=>
-                                                    acc + (priceAt.get(curTime) ?? 0)
-                                                    ,0)
-                               ),-Infinity);
-    return foo;
-
-    return dataBySeller;
+    // a tad slow, but not terrible
+    return reduce(allTimes,
+                  (acc,curTime)=> Math.max(
+                      acc,
+                      dataBySeller.reduce(
+                          (acc,{priceAt})=> acc + (priceAt.get(curTime) ?? 0)
+                          ,0)
+                  ),-Infinity);
 }
 
 
 export async function main(lines:string[]) {
     const cleanedLines = lines.map(l=>l.trim()).filter(l=>l!='');
 
+    // example
     //const cleanedLines = [ 1,2,3,2024];
 
-    let values = cleanedLines.map(BigInt);
+    const values = cleanedLines.map(BigInt);
 
     //console.log(values);
 
@@ -89,11 +87,7 @@ export async function main(lines:string[]) {
 
     console.log({priceLists});
 
-    const topPrices = findTopPrices(priceLists);
-
-    //console.log({topPrices})
-
-    const answer = topPrices;
+    const answer = findMaxBanannas(priceLists);
 
     console.log(answer);
 }
