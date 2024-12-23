@@ -1,11 +1,5 @@
-import { runMain, sum, } from "../util.ts";
-import { count, map } from "../iter_util.ts";
-import { memoize, pipe, } from '../func_util.ts';
-import * as gu from "../grid_util.ts";
-
-export type Foo = {
-    TODO:unknown,
-};
+import { runMain, } from "../util.ts";
+import { pipe, } from '../func_util.ts';
 
 export function parseInput(lines:string[]) {
     const pairs = lines.map(l=>l.split("-"));
@@ -27,14 +21,6 @@ export function parseInput(lines:string[]) {
 
 export function findLoopsOfThree(map:Map<string,string[]>) {
     const loops = [];
-
-    function findPath(current:string, goal:string, depth=3) {
-        if(depth === 0) return [];
-        if(current === goal) return [current];
-
-        const neighbors = map.get(current)!;
-        // nvm
-    }
 
     for(const [k,vs] of map.entries()) {
         if(!k.startsWith("t"))
@@ -73,9 +59,7 @@ export async function main(lines:string[]) {
 
     const loops = findLoopsOfThree(map);
 
-    console.log({map,loops,loopCount:loops.length});
-
-
+    //console.log({map,loops,loopCount:loops.length});
 
     const answer = loops.length;
 

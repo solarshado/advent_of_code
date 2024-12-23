@@ -1,12 +1,8 @@
-import { runMain, sum, } from "../util.ts";
-import { count, filter, map, reduce } from "../iter_util.ts";
-import { memoize, pipe, } from '../func_util.ts';
-import * as gu from "../grid_util.ts";
+import { runMain, } from "../util.ts";
+import { filter, reduce } from "../iter_util.ts";
 import { parseInput } from './part1.ts';
 
 function findLargestGroup(map: Map<string, string[]>):string[] {
-    // hmmm... build up or break down?
-
     const newMap = new Map(map.entries().map(([k,vs])=>[k,new Set(vs)]))
 
     const [candidates,largestHubSize] = reduce(
@@ -37,13 +33,7 @@ function findLargestGroup(map: Map<string, string[]>):string[] {
             return acc;
     }, [[],0] as [string[],number]);
 
-    //console.log({startPoints,bestStartPointScore});
-
     const startPointSet = new Set(startPoints);
-
-    // long shot, don't bother
-    //if(startPoints.every(sp=>newMap.get(sp)!.isSupersetOf(startPointSet)) {}
-
     let retVal = new Set<string>();
 
     for(const startPoint of startPointSet) {
@@ -75,7 +65,6 @@ function findLargestGroup(map: Map<string, string[]>):string[] {
 
     return [...retVal];
 }
-
 
 export async function main(lines:string[]) {
     const cleanedLines = lines.map(l=>l.trim()).filter(l=>l!='');
